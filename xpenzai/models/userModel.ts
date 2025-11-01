@@ -1,7 +1,8 @@
-import mongoose, { Schema, Model, Document } from "mongoose";
+import mongoose, { Schema, Model, Document, Types } from "mongoose";
 
 // defining the type Safety for user
 export interface UserType extends Document {
+  _id: Types.ObjectId;
   username: string;
   email: string;
   password: string;
