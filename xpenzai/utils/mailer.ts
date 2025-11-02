@@ -10,18 +10,18 @@ interface mailProps {
 }
 
 // create a transporter
-var transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: "live.smtp.mailtrap.io",
   port: 587,
   auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
+    user: "XpenzAi",
+    pass: "72579f9a504819eb6834fb01d7247beb",
   },
 });
 
 const sendEmail = async ({ email, emailType, userId }: mailProps) => {
   try {
-    // create and set token 
+    // create and set token
     if (emailType === "VERIFY") {
       const token = await bcrypt.hash(userId.toString(), 10);
       await User.findByIdAndUpdate(userId, {
@@ -36,7 +36,7 @@ const sendEmail = async ({ email, emailType, userId }: mailProps) => {
       });
     }
 
-    // mail
+    // mail1
     const mailOptions = {
       from: "akshajr11@gmail.com",
       to: email,
@@ -75,7 +75,7 @@ const sendEmail = async ({ email, emailType, userId }: mailProps) => {
     const mainResponse = await transporter.sendMail(mailOptions);
     return mainResponse;
   } catch (error) {
-    console.log("Something went wrong while sending email to the user");
+    console.log("Something went wrong while sending email to the user" + error);
   }
 };
 

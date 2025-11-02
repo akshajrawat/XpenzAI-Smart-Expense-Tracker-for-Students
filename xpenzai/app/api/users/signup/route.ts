@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     // send final resposne
     const finalUser = await User.findOne({ email }).select("-password");
-    NextResponse.json(
+    return NextResponse.json(
       {
         message: "User registered successfully",
         success: true,
