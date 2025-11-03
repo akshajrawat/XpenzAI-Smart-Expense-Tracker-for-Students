@@ -1,11 +1,19 @@
 import connectDb from "@/config/dbConfig";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import sendEmail from "@/utils/mailer";
+import { Types } from "mongoose";
 
 connectDb();
+
+export interface tokenTypes extends JwtPayload {
+  id: Types.ObjectId;
+  username: string;
+  email: string;
+  isVerified: boolean;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     // create a jwt token
-    const tokenPayload = {
+    const tokenPayload: tokenTypes = {
       id: user._id,
       username: user.username,
       email: user.email,
