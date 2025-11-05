@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={balooBhai.variable}>
-        <header className="h-[6vh]">
+        <header className="h-[6vh] lg:h-[10vh]">
           <Navbar />
         </header>
         <main className="flex flex-2">{children}</main>
