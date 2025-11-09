@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Baloo_Bhai_2 } from "next/font/google";
 import Navbar from "@/component/Navbar";
+import Footer from "@/component/Footer";
 
 const balooBhai = Baloo_Bhai_2({
   subsets: ["latin"],
@@ -21,12 +22,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={balooBhai.variable}>
-        <header className="h-[6vh] lg:h-[10vh]">
+      <body
+        className={`${balooBhai.variable} bg-linear-to-br from-white via-green-50 to-green-200 min-h-screen grid grid-rows-[auto_1fr]`}
+      >
+        <header className="h-[8vh] lg:h-[10vh]">
           <Navbar />
         </header>
-        <main className="flex flex-2">{children}</main>
-        <footer className="bg-black h-[8vh] fixed bottom-0"></footer>
+        <main className=" flex-1 h-[92vh] lg:h-[90vh]">
+          {children}
+        </main>
+        <footer className="bg-linear-to-br from-gray-950 via-gray-900 to-green-950 text-gray-300 border-t border-green-800">
+          <Footer />
+        </footer>
       </body>
     </html>
   );

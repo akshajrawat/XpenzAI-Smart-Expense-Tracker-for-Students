@@ -11,25 +11,25 @@ interface mailProps {
 
 // create a transporter
 const transporter = nodemailer.createTransport({
-  host: "live.smtp.mailtrap.io",
-  port: 587,
+  host: "sandbox.smtp.mailtrap.io",
+  port: 2525,
   auth: {
-    user: "XpenzAi",
-    pass: "72579f9a504819eb6834fb01d7247beb",
+    user: "3fb7edceb3d45b",
+    pass: "cba613ee2cb460",
   },
 });
 
 const sendEmail = async ({ email, emailType, userId }: mailProps) => {
   try {
-    // create and set token
+    // create token
+    const token = await bcrypt.hash(userId.toString(), 10);
+    //  set token
     if (emailType === "VERIFY") {
-      const token = await bcrypt.hash(userId.toString(), 10);
       await User.findByIdAndUpdate(userId, {
         verifyToken: token,
         verifyTokenExpiry: Date.now() + 3600000,
       });
     } else if (emailType === "RESET") {
-      const token = await bcrypt.hash(userId.toString(), 10);
       await User.findByIdAndUpdate(userId, {
         forgotPasswordToken: token,
         forgotPasswordTokenExpiry: Date.now() + 3600000,
@@ -56,7 +56,7 @@ const sendEmail = async ({ email, emailType, userId }: mailProps) => {
       }:
     </p>
     <p>
-      <a href="" 
+      <a href="${process.env.SERVER}/emailverification/${token}" 
          style="color: #0070f3; text-decoration: none; font-weight: bold;">
          ${emailType === "VERIFY" ? "Verify your email" : "Reset your password"}
       </a>
@@ -64,6 +64,7 @@ const sendEmail = async ({ email, emailType, userId }: mailProps) => {
     <p>Or paste this link into your browser:</p>
     <p style="word-wrap: break-word; color: #555;">
       // link
+      ${process.env.SERVER}/emailverification/${token}
     </p>
     <br/>
     <p style="font-size: 0.9em; color: #777;">
