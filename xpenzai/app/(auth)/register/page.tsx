@@ -1,34 +1,58 @@
 "use client";
 import ProfileIcon from "@/component/ProfileIcon";
+import axiosInstance from "@/utils/axios";
 import Link from "next/link";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { stateProps } from "../emailverification/[token]/page";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
-type Inputs = {
+interface Inputs {
   username: string;
   email: string;
-  password: number;
-};
+  password: string;
+}
 
-const Login = () => {
+const Register = () => {
+  // states
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<stateProps>({
+    message: "",
+    status: false,
+  });
+
   const {
     handleSubmit,
     register,
-    watch,
     formState: { errors },
   } = useForm<Inputs>();
-  console.log(watch("email"));
-  console.log(watch("password"));
-  const onSubmit: SubmitHandler<Inputs> = () => {};
+
+  // Handle submit of data
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.post("/api/users/signup", data);
+      toast.success(response?.data.message);
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      setError({
+        message: error.response?.data.message || error.message,
+        status: true,
+      });
+      console.error(
+        "Error in register.tsx :- ",
+        error.response?.data.message || error.message
+      );
+    }
+  };
   return (
     <div className="h-[94vh] lg:h-[90vh] px-[10%] sm:px-[25%] xl:px-[32%] pt-8 w-full flex flex-col justify-center">
       {/* Profile Icon */}
       <ProfileIcon />
 
       {/* Text */}
-      <h1 className="text-xl lg:text-3xl font-medium ml-1 mt-3">
-        {" "}
-        Welcome Back
-      </h1>
+      <h1 className="text-xl lg:text-3xl font-bold ml-1 mt-3"> Welcome Back</h1>
       <p className="text-sm lg:text-lg font-semibold text-[#00000077] ml-1">
         {" "}
         Register to continue your expense tracking!!
@@ -54,7 +78,7 @@ const Login = () => {
             placeholder="Username"
             {...register("username", { required: true })}
           />
-          {errors.email && (
+          {errors.username && (
             <span className="text-red-800 text-sm font-bold">
               This field is required*
             </span>
@@ -105,7 +129,7 @@ const Login = () => {
           )}
         </div>
         <input
-          className="bg-[#2ec4b6] text-white font-bold px-6 py-2 rounded-2xl mt-3 shadow-sm"
+          className="bg-green-600 text-white font-bold px-6 py-2 rounded-2xl mt-3 shadow-sm"
           type="submit"
         />
       </form>
@@ -122,7 +146,7 @@ const Login = () => {
       {/* login */}
       <p className="text-center w-full lg:text-lg">
         Already have an account?{" "}
-        <Link className="font-bold text-[#2ec4b6]" href={"/login"}>
+        <Link className="font-bold text-green-600" href={"/login"}>
           SignIn
         </Link>
       </p>
@@ -130,4 +154,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

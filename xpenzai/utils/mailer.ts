@@ -11,11 +11,10 @@ interface mailProps {
 
 // create a transporter
 const transporter = nodemailer.createTransport({
-  host: "sandbox.smtp.mailtrap.io",
-  port: 2525,
+  service: "gmail",
   auth: {
-    user: "3fb7edceb3d45b",
-    pass: "cba613ee2cb460",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -38,7 +37,7 @@ const sendEmail = async ({ email, emailType, userId }: mailProps) => {
 
     // mail1
     const mailOptions = {
-      from: "akshajr11@gmail.com",
+      from: process.env.EMAIL_USER,
       to: email,
       subject:
         emailType === "VERIFY" ? "Verify your email" : "Reset your password",

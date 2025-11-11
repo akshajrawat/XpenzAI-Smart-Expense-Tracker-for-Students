@@ -3,6 +3,7 @@ import "./globals.css";
 import { Baloo_Bhai_2 } from "next/font/google";
 import Navbar from "@/component/Navbar";
 import Footer from "@/component/Footer";
+import { Toaster } from "react-hot-toast";
 
 const balooBhai = Baloo_Bhai_2({
   subsets: ["latin"],
@@ -25,12 +26,11 @@ export default function RootLayout({
       <body
         className={`${balooBhai.variable} bg-linear-to-br from-white via-green-50 to-green-200 min-h-screen grid grid-rows-[auto_1fr]`}
       >
+        <Toaster position="top-center" reverseOrder={false} />
         <header className="h-[8vh] lg:h-[10vh]">
           <Navbar />
         </header>
-        <main className=" flex-1 h-[92vh] lg:h-[90vh]">
-          {children}
-        </main>
+        <main className=" flex-1 h-[92vh] lg:h-[90vh]">{children}</main>
         <footer className="bg-linear-to-br from-gray-950 via-gray-900 to-green-950 text-gray-300 border-t border-green-800">
           <Footer />
         </footer>

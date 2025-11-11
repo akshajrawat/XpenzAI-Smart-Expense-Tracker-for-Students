@@ -1,6 +1,7 @@
-"use client"
+"use client";
 import Lottie from "lottie-react";
 import expenseAnimation from "@/public/animation/Money Investment.json";
+import Link from "next/link";
 
 const Home = () => {
   const expenseFeatures = [
@@ -21,7 +22,7 @@ const Home = () => {
         {/* content area */}
         <div className="px-1 flex flex-col gap-3 xl:gap-6 items-center lg:w-[55%]">
           <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl text-center font-bold">
-            Guiding You Through <span className="text-green-700">Expense</span>{" "}
+            Guiding You Through <span className="text-green-600">Expense</span>{" "}
             Complexity{" "}
           </h1>
           <p className="text-center text-sm md:text-lg xl:text-xl sm:px-4 font-semibold text-[#00000069]">
@@ -30,10 +31,12 @@ const Home = () => {
             students and individuals manage budgets, control spending, and build
             better financial habits.
           </p>
-          <button className="bg-green-600 text-white py-2 xl:py-3 w-35 rounded-full font-semibold shadow-sm">
-            {" "}
-            Start Tracking{" "}
-          </button>
+          <Link
+            href="/login"
+            className="bg-green-600 hover:bg-green-700 text-white py-2 xl:py-3 w-35 rounded-full font-semibold shadow-sm flex justify-center items-center transition-colors duration-200"
+          >
+            Start Tracking
+          </Link>
 
           {/* features display */}
           <div className="flex justify-center mt-1 gap-3  flex-wrap">
@@ -53,7 +56,7 @@ const Home = () => {
         {/* image area */}
         <div className=" flex flex-1 h-45 sm:h-55 lg:h-65 xl:h-85 justify-center items-center mt-4 md:mt-1">
           <Lottie
-          className="w-full h-full object-fill"
+            className="w-full h-full object-fill"
             animationData={expenseAnimation}
             loop={true}
             autoplay={true}

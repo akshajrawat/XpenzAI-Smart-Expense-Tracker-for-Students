@@ -42,17 +42,24 @@ export async function POST(request: NextRequest) {
     console.log(savedUser);
 
     // send verification email
-    await sendEmail({
-      email,
-      emailType: "VERIFY",
-      userId: savedUser._id,
-    });
+    try {
+      await sendEmail({
+        email,
+        emailType: "VERIFY",
+        userId: savedUser._id,
+      });
+    } catch (error) {
+      return NextResponse.json(
+        { error: "error while sending email" },
+        { status: 400 }
+      );
+    }
 
     // send final resposne
     const finalUser = await User.findOne({ email }).select("-password");
     return NextResponse.json(
       {
-        message: "User registered successfully",
+        message: "Please check your email for verification",
         success: true,
         user: finalUser,
       },

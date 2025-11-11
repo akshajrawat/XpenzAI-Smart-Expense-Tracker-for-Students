@@ -25,7 +25,7 @@ const Login = () => {
       <ProfileIcon />
 
       {/* Text */}
-      <h1 className="text-xl lg:text-3xl font-medium ml-1 mt-3">
+      <h1 className="text-xl lg:text-3xl font-bold ml-1 mt-3">
         {" "}
         Welcome Back
       </h1>
@@ -85,13 +85,13 @@ const Login = () => {
           {/* forgot password */}
           <p className="text-right text-sm lg:text-lg font-semibold mt-1 mr-2">
             Forgot your password?{" "}
-            <Link className="font-bold text-[#2ec4b6]" href={"/"}>
+            <Link className="font-bold text-green-600" href={"/"}>
               Reset
             </Link>
           </p>
         </div>
         <input
-          className="bg-[#2ec4b6] text-white font-bold px-6 py-2 rounded-2xl mt-3 shadow-sm"
+          className="bg-green-600 text-white font-bold px-6 py-2 rounded-2xl mt-3 shadow-sm"
           type="submit"
         />
       </form>
@@ -108,7 +108,7 @@ const Login = () => {
       {/* register */}
       <p className="text-center w-full lg:text-lg">
         Don't have an account?{" "}
-        <Link className="font-bold text-[#2ec4b6]" href={"/register"}>
+        <Link className="font-bold text-green-600" href={"/register"}>
           SignUp
         </Link>
       </p>
