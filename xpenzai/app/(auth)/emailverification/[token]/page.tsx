@@ -6,6 +6,7 @@ import axiosInstance from "@/utils/axios";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export interface stateProps {
   message: string;
@@ -34,8 +35,9 @@ const EmailVerification = () => {
   const handleEmailVerification = async () => {
     try {
       setLoading(true);
-      await axiosInstance.post("/api/users/verifyemail", { token });
+      const res = await axiosInstance.post("/api/users/verifyemail", { token });
       setLoading(false);
+      toast.success(res?.data.message);
       router.push("/login");
     } catch (error: any) {
       setLoading(false);
@@ -75,11 +77,7 @@ const EmailVerification = () => {
         {error.status && <ErrorMessage message={error.message} />}
 
         {/* loading state */}
-        {loading && (
-          <p>
-            <Loading message="" />
-          </p>
-        )}
+        {loading && <Loading message="" />}
       </div>
     </div>
   );

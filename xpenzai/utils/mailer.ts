@@ -1,11 +1,11 @@
 import User from "@/models/userModel";
-import bcrypt from "bcryptjs";
+import { v4 as uuidv4 } from "uuid";
 import { Types } from "mongoose";
 import nodemailer from "nodemailer";
 
 interface mailProps {
   email: string;
-  emailType: string;
+  emailType: "VERIFY" | "RESET";
   userId: Types.ObjectId | string;
 }
 
@@ -20,8 +20,10 @@ const transporter = nodemailer.createTransport({
 
 const sendEmail = async ({ email, emailType, userId }: mailProps) => {
   try {
+    console.log("MAILER USER ID:", userId);
+
     // create token
-    const token = await bcrypt.hash(userId.toString(), 10);
+    const token = uuidv4();
     //  set token
     if (emailType === "VERIFY") {
       await User.findByIdAndUpdate(userId, {
@@ -62,7 +64,6 @@ const sendEmail = async ({ email, emailType, userId }: mailProps) => {
     </p>
     <p>Or paste this link into your browser:</p>
     <p style="word-wrap: break-word; color: #555;">
-      // link
       ${process.env.SERVER}/emailverification/${token}
     </p>
     <br/>

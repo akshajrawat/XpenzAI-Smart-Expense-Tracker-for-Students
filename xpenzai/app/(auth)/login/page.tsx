@@ -2,7 +2,12 @@
 
 import ProfileIcon from "@/component/ProfileIcon";
 import Link from "next/link";
+import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { stateProps } from "../emailverification/[token]/page";
+import axiosInstance from "@/utils/axios";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 type Inputs = {
   email: string;
@@ -10,25 +15,48 @@ type Inputs = {
 };
 
 const Login = () => {
+  const router = useRouter();
+  // states
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<stateProps>({
+    message: "",
+    status: false,
+  });
+
   const {
     handleSubmit,
     register,
-    watch,
     formState: { errors },
   } = useForm<Inputs>();
-  console.log(watch("email"));
-  console.log(watch("password"));
-  const onSubmit: SubmitHandler<Inputs> = () => {};
+
+  // handles login logic
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.post("/api/users/login", data);
+      toast.success(response?.data.message);
+      setLoading(false);
+      router.push("/");
+    } catch (error: any) {
+      setLoading(false);
+      setError({
+        message: error.response?.data.message || error.message,
+        status: true,
+      });
+      console.error(
+        "Error in login.tsx :- ",
+        error.response?.data.message || error.message
+      );
+    }
+  };
+
   return (
     <div className=" h-[94vh] lg:h-[90vh]  px-[10%] sm:px-[25%] xl:px-[32%] pt-8 w-full flex flex-col justify-center">
       {/* Profile Icon */}
       <ProfileIcon />
 
       {/* Text */}
-      <h1 className="text-xl lg:text-3xl font-bold ml-1 mt-3">
-        {" "}
-        Welcome Back
-      </h1>
+      <h1 className="text-xl lg:text-3xl font-bold ml-1 mt-3"> Welcome Back</h1>
       <p className="text-sm lg:text-lg font-semibold text-[#00000077] ml-1">
         {" "}
         LogIn to continue your expense tracking!!
@@ -47,18 +75,18 @@ const Login = () => {
           >
             Email :
           </label>
-          <input
-            id="email"
-            className="border-2 border-[#0000001d] py-1 px-4 rounded-xl shadow-sm"
-            type="text"
-            placeholder="Email"
-            {...register("email", { required: true })}
-          />
-          {errors.email && (
-            <span className="text-red-700 font-bold text-sm">
-              This field is required*
-            </span>
-          )}
+          <div className="flex gap-1">
+            <input
+              id="email"
+              className="border-2 border-[#0000001d] py-1 px-4 rounded-xl shadow-sm outline-none w-full"
+              type="text"
+              placeholder="Email"
+              {...register("email", { required: true })}
+            />
+            {errors.email && (
+              <span className="text-red-700 font-bold text-sm">*</span>
+            )}
+          </div>
         </div>
 
         {/* password */}
@@ -69,18 +97,18 @@ const Login = () => {
           >
             Password :
           </label>
-          <input
-            id="password"
-            className="border-2 border-[#0000001d] py-1 px-4 rounded-xl shadow-sm"
-            type="text"
-            placeholder="Password"
-            {...register("password", { required: true })}
-          />
-          {errors.password && (
-            <span className="text-red-700 font-bold text-sm">
-              This field is required*
-            </span>
-          )}
+          <div className="flex gap-1">
+            <input
+              id="password"
+              className="border-2 border-[#0000001d] py-1 px-4 rounded-xl shadow-sm outline-none w-full"
+              type="text"
+              placeholder="Password"
+              {...register("password", { required: true })}
+            />
+            {errors.password && (
+              <span className="text-red-700 font-bold text-sm">*</span>
+            )}
+          </div>
 
           {/* forgot password */}
           <p className="text-right text-sm lg:text-lg font-semibold mt-1 mr-2">

@@ -6,8 +6,6 @@ import bcrypt from "bcryptjs";
 import sendEmail from "@/utils/mailer";
 import { Types } from "mongoose";
 
-connectDb();
-
 export interface tokenTypes extends JwtPayload {
   id: Types.ObjectId;
   username: string;
@@ -16,6 +14,8 @@ export interface tokenTypes extends JwtPayload {
 }
 
 export async function POST(request: NextRequest) {
+  await connectDb();
+  
   try {
     const reqBody = await request.json();
     const { email, password } = reqBody;

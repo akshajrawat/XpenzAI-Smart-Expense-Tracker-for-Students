@@ -71,18 +71,18 @@ const Register = () => {
           >
             Username :
           </label>
-          <input
-            id="username"
-            className="border-2 border-[#0000001d] py-1 px-4 rounded-xl shadow-sm"
-            type="text"
-            placeholder="Username"
-            {...register("username", { required: true })}
-          />
-          {errors.username && (
-            <span className="text-red-800 text-sm font-bold">
-              This field is required*
-            </span>
-          )}
+          <div className="flex  gap-1">
+            <input
+              id="username"
+              className="border-2 w-full border-[#0000001d] py-1 px-4 rounded-xl shadow-sm outline-none"
+              type="text"
+              placeholder="Username"
+              {...register("username", { required: true })}
+            />
+            {errors.username && (
+              <span className="text-red-800 text-sm font-bold">*</span>
+            )}
+          </div>
         </div>
 
         {/* email */}
@@ -93,18 +93,18 @@ const Register = () => {
           >
             Email :
           </label>
-          <input
-            id="email"
-            className="border-2 border-[#0000001d] py-1 px-4 rounded-xl shadow-sm"
-            type="text"
-            placeholder="Email"
-            {...register("email", { required: true })}
-          />
-          {errors.email && (
-            <span className="text-red-800 text-sm font-bold">
-              This field is required*
-            </span>
-          )}
+          <div className="flex gap-1">
+            <input
+              id="email"
+              className="border-2 w-full border-[#0000001d] py-1 px-4 rounded-xl shadow-sm outline-none"
+              type="text"
+              placeholder="Email"
+              {...register("email", { required: true })}
+            />
+            {errors.email && (
+              <span className="text-red-800 text-sm font-bold">*</span>
+            )}
+          </div>
         </div>
 
         {/* password */}
@@ -115,18 +115,18 @@ const Register = () => {
           >
             Password :
           </label>
-          <input
-            id="password"
-            className="border-2 border-[#0000001d] py-1 px-4 rounded-xl shadow-sm"
-            type="text"
-            placeholder="Password"
-            {...register("password", { required: true })}
-          />
-          {errors.password && (
-            <span className="text-red-800 text-sm font-bold">
-              This field is required*
-            </span>
-          )}
+          <div className="flex gap-1">
+            <input
+              id="password"
+              className="border-2 w-full border-[#0000001d] py-1 px-4 rounded-xl shadow-sm outline-none"
+              type="text"
+              placeholder="Password"
+              {...register("password", { required: true })}
+            />
+            {errors.password && (
+              <span className="text-red-800 text-sm font-bold">*</span>
+            )}
+          </div>
         </div>
         <input
           className="bg-green-600 text-white font-bold px-6 py-2 rounded-2xl mt-3 shadow-sm"

@@ -2,16 +2,20 @@ import connectDb from "@/config/dbConfig";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 
-connectDb();
-
 export async function POST(request: NextRequest) {
+  await connectDb();
+
   try {
     const reqBody = await request.json();
     const { token } = reqBody;
+    console.log("SERVER RECEIVED TOKEN:", token);
 
     // check whether token exist
     if (!token) {
-      return NextResponse.json({ message: "Invalid Token" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Please Provide a token" },
+        { status: 400 }
+      );
     }
 
     //   find if token exist in db and validates

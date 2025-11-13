@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import sendEmail from "@/utils/mailer";
 
-connectDb();
-
 export async function POST(request: NextRequest) {
+  await connectDb();
+  
   try {
     const reqBody = await request.json();
     const { username, email, password } = reqBody;
@@ -20,7 +20,9 @@ export async function POST(request: NextRequest) {
     }
 
     // check if user already exist
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      $or: [{ email: email }, { username: username }],
+    });
     if (user) {
       return NextResponse.json(
         { message: "User already exist" },
@@ -69,3 +71,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error }, { status: 500 });
   }
 }
+
+// todo :- Make uniqueness ceck for username and password too
