@@ -57,14 +57,14 @@ const sendEmail = async ({ email, emailType, userId }: mailProps) => {
       }:
     </p>
     <p>
-      <a href="${process.env.SERVER}/emailverification/${token}" 
+      <a href="${process.env.SERVER}/auth/emailverification/${token}" 
          style="color: #0070f3; text-decoration: none; font-weight: bold;">
          ${emailType === "VERIFY" ? "Verify your email" : "Reset your password"}
       </a>
     </p>
     <p>Or paste this link into your browser:</p>
     <p style="word-wrap: break-word; color: #555;">
-      ${process.env.SERVER}/emailverification/${token}
+      ${process.env.SERVER}/auth/emailverification/${token}
     </p>
     <br/>
     <p style="font-size: 0.9em; color: #777;">

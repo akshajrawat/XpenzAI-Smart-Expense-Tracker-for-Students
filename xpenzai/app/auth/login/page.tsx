@@ -4,10 +4,10 @@ import ProfileIcon from "@/component/ProfileIcon";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { stateProps } from "../emailverification/[token]/page";
 import axiosInstance from "@/utils/axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { stateProps } from "../emailverification/[token]/page";
 
 type Inputs = {
   email: string;
@@ -33,7 +33,7 @@ const Login = () => {
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
       setLoading(true);
-      const response = await axiosInstance.post("/api/users/login", data);
+      const response = await axiosInstance.post("/api/users", data);
       toast.success(response?.data.message);
       setLoading(false);
       router.push("/");
@@ -136,7 +136,7 @@ const Login = () => {
       {/* register */}
       <p className="text-center w-full lg:text-lg">
         Don't have an account?{" "}
-        <Link className="font-bold text-green-600" href={"/register"}>
+        <Link className="font-bold text-green-600" href={"/auth/register"}>
           SignUp
         </Link>
       </p>

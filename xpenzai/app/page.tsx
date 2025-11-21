@@ -32,7 +32,7 @@ const Home = () => {
             better financial habits.
           </p>
           <Link
-            href="/login"
+            href="/auth/login"
             className="bg-green-600 hover:bg-green-700 text-white py-2 xl:py-3 w-35 rounded-full font-semibold shadow-sm flex justify-center items-center transition-colors duration-200"
           >
             Start Tracking

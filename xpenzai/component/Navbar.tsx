@@ -8,7 +8,7 @@ const Navbar = () => {
       <Logo href="/" />
       {/* get started  */}
       <button className="bg-green-600 hover:bg-green-700 text-white py-1 sm:py-2 xl:py-3 w-30 xl:w-35 rounded-full font-bold shadow-sm transition-colors duration-200">
-        <Link href="/login">Get Started</Link>
+        <Link href="/auth/login">Get Started</Link>
       </button>
     </div>
   );

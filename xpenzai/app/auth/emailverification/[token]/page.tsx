@@ -38,7 +38,7 @@ const EmailVerification = () => {
       const res = await axiosInstance.post("/api/users/verifyemail", { token });
       setLoading(false);
       toast.success(res?.data.message);
-      router.push("/login");
+      router.push("/auth/login");
     } catch (error: any) {
       setLoading(false);
       setError({
