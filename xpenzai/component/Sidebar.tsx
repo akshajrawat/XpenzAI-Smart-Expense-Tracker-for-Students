@@ -1,13 +1,5 @@
 "use client";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+
 import Logo from "./Logo";
 import {
   Home,
@@ -18,7 +10,6 @@ import {
   Settings,
   Menu,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 
@@ -62,67 +53,25 @@ export const sidebarLinks = [
 ];
 const Sidebar = () => {
   return (
-    <>
-      <div className="md:hidden">
-        <Sheet>
-          <SheetTrigger className="px-2 py-3">
-            <Menu />
-          </SheetTrigger>
-          <SheetContent side="left">
-            <VisuallyHidden>
-              <SheetTitle></SheetTitle>
-            </VisuallyHidden>
-
-            {/* logo */}
-            <div className="p-3">
-              <Logo href="/home" />
-            </div>
-
-            {/* components */}
-            <ScrollArea>
-              <div className="flex flex-col gap-2">
-                {sidebarLinks.map((comp) => {
-                  return (
-                    <button
-                      className="w-full h-14 px-4 py-2 hover:bg-[#d8d8d863]"
-                      key={comp.id}
-                    >
-                      <Link
-                        className="flex gap-3 justify-start items-center font-semibold"
-                        href={comp.href}
-                      >
-                        {comp.icon}
-                        {comp.title}
-                      </Link>
-                    </button>
-                  );
-                })}
-              </div>
-            </ScrollArea>
-          </SheetContent>
-        </Sheet>
+    <div className="hidden md:flex md:flex-col w-64 border-r gap-2 bg-white h-full">
+      <div className="p-3 border-b-2">
+        <Logo href="/overview" />
       </div>
-      {/* Desktop permanent sidebar */}
-      <aside className="hidden md:flex md:flex-col w-64 border-r bg-white">
-        <div className="p-3">
-          <Logo href="/home" />
+      <ScrollArea className="flex-1">
+        <div className="flex flex-col gap-2 md:gap-5 p-2">
+          {sidebarLinks.map((comp) => (
+            <Link
+              key={comp.id}
+              href={comp.href}
+              className="flex items-center gap-3 h-12 px-4 rounded-md hover:bg-muted font-medium md:font-semibold md:text-lg"
+            >
+              {comp.icon}
+              {comp.title}
+            </Link>
+          ))}
         </div>
-        <ScrollArea className="flex-1">
-          <div className="flex flex-col gap-2 p-2">
-            {sidebarLinks.map((comp) => (
-              <Link
-                key={comp.id}
-                href={comp.href}
-                className="flex items-center gap-3 h-12 px-4 rounded-md hover:bg-muted font-medium"
-              >
-                {comp.icon}
-                {comp.title}
-              </Link>
-            ))}
-          </div>
-        </ScrollArea>
-      </aside>
-    </>
+      </ScrollArea>
+    </div>
   );
 };
 

@@ -6,6 +6,7 @@ export interface UserType extends Document {
   username: string;
   email: string;
   password: string;
+  walletBalanceInPaise: number;
   isVerified: boolean;
   isAdmin: boolean;
   forgotPasswordToken?: string;
@@ -40,6 +41,11 @@ const userSchema = new Schema<UserType>({
   isAdmin: {
     type: Boolean,
     default: false,
+  },
+
+  walletBalanceInPaise: {
+    type: Number,
+    default: 0,
   },
 
   forgotPasswordToken: String,

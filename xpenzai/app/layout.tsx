@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Baloo_Bhai_2 } from "next/font/google";
-import Navbar from "@/component/Navbar";
-import Footer from "@/component/Footer";
 import { Toaster } from "react-hot-toast";
-import { headers } from "next/headers";
+import LayoutWrapper from "@/component/LayoutWrapper";
 
 const balooBhai = Baloo_Bhai_2({
   subsets: ["latin"],
@@ -22,28 +20,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headerlist = await headers();
-  const pathname = headerlist.get("x-pathname") || "";
-  const isAuth = pathname.startsWith("/auth");
   return (
     <html lang="en">
       <body
         className={`${balooBhai.variable} bg-linear-to-br from-white via-green-50 to-green-200 min-h-screen grid grid-rows-[auto_1fr]`}
       >
         <Toaster position="top-center" reverseOrder={false} />
-        {/* authnavbar */}
-        {isAuth && (
-          <header className="h-[8vh] lg:h-[10vh]">
-            <Navbar />
-          </header>
-        )}
-        <main className=" flex-1 min-h-[92vh] lg:min-h-[90vh]">{children}</main>
-        {/* authfooter */}
-        {isAuth && (
-          <footer className="bg-linear-to-br from-gray-950 via-gray-900 to-green-950 text-gray-300 border-t border-green-800">
-            <Footer />
-          </footer>
-        )}
+
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );

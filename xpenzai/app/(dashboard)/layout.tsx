@@ -1,3 +1,4 @@
+import MiniNav from "@/component/MiniNav";
 import Sidebar from "@/component/Sidebar";
 
 export default async function DashboardLayout({
@@ -6,14 +7,14 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <section className="flex w-full">
+    <section className="flex w-full h-full">
       {/* sidebar */}
-      <aside>
+      <aside className="hidden md:block">
         <Sidebar />
       </aside>
       <div className="h-full w-full">
         {/* mini nav */}
-        <div className="py-3 flex justify-end px-2"> Hi this is mini nav </div>
+        <MiniNav />
         {/* main */}
         <div>{children}</div>{" "}
       </div>
