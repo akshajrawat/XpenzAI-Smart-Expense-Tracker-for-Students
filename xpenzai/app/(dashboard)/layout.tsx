@@ -16,7 +16,7 @@ export default async function DashboardLayout({
         {/* mini nav */}
         <MiniNav />
         {/* main */}
-        <div>{children}</div>{" "}
+        <div className="p-6">{children}</div>{" "}
       </div>
     </section>
   );

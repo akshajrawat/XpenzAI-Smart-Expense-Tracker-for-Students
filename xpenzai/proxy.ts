@@ -6,7 +6,7 @@ import { tokenTypes } from "@/app/api/users/login/route";
 const PUBLIC_API: string[] = ["/api/users"];
 
 // private api that only user with token can hit
-const PRIVATE_API: string[] = [];
+const PRIVATE_API: string[] = ["/api/wallet"];
 
 // paths that user can hit when they have no token
 const NO_TOKEN_PATH: string[] = ["/auth"];
@@ -29,8 +29,10 @@ export function proxy(req: NextRequest) {
     }
   }
 
+  const headers = new Headers(req.headers);
+
   //   LOGIC FOR PUBLIC API THAT ANYONE CAN HIT
-  if (PUBLIC_API.some((p) => path.startsWith(p))) {
+  if (PUBLIC_API.some((p) => path.startsWith(p)) && path !== "/api/users/me") {
     return NextResponse.next();
   }
 
@@ -44,7 +46,7 @@ export function proxy(req: NextRequest) {
   }
 
   //  LOGIC FOR PATH THAT ONLY PEOPLE WITH NO TOKEN CAN SEE
-  if (NO_TOKEN_PATH.some((p) => path.startsWith(p))) {
+  if (NO_TOKEN_PATH.some((p) => path.startsWith(p)) || path === "/") {
     if (!user) {
       return NextResponse.next();
     } else {
@@ -53,9 +55,12 @@ export function proxy(req: NextRequest) {
   }
 
   //   LOGIC FOR PATH THAT ONLY PEOPLE WITH TOKEN CAN SEE
-  if (PRIVATE_API.some((p) => path.startsWith(p))) {
+  if (PRIVATE_API.some((p) => path.startsWith(p)) || path === "/api/users/me") {
     if (user) {
-      return NextResponse.next();
+      headers.set("x-user-id", user.id.toString());
+      return NextResponse.next({
+        request: { headers },
+      });
     } else {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

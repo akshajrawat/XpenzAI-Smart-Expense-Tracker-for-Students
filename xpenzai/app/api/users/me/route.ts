@@ -5,7 +5,7 @@ import { getInformationFromToken } from "@/utils/getInfoFromToken";
 
 export async function GET(request: NextRequest) {
   await connectDb();
-  
+
   try {
     // extract id from token
     const id = await getInformationFromToken(request);

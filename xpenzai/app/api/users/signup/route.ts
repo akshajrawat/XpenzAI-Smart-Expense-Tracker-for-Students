@@ -6,7 +6,7 @@ import sendEmail from "@/utils/mailer";
 
 export async function POST(request: NextRequest) {
   await connectDb();
-  
+
   try {
     const reqBody = await request.json();
     const { username, email, password } = reqBody;
@@ -23,10 +23,22 @@ export async function POST(request: NextRequest) {
     const user = await User.findOne({
       $or: [{ email: email }, { username: username }],
     });
-    if (user) {
+    if (user && user.isVerified === true) {
       return NextResponse.json(
         { message: "User already exist" },
         { status: 400 }
+      );
+    } else if (user && user.isVerified === false) {
+      await sendEmail({
+        email,
+        emailType: "VERIFY",
+        userId: user._id,
+      });
+      return NextResponse.json(
+        {
+          message: "Please check your email for verification",
+        },
+        { status: 200 }
       );
     }
 

@@ -1,27 +1,26 @@
 "use client";
 
-import ProfileIcon from "@/component/ProfileIcon";
-import Link from "next/link";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import axiosInstance from "@/utils/axios";
-import toast from "react-hot-toast";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { stateProps } from "../emailverification/[token]/page";
+import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
+
+import axiosInstance from "@/utils/axios";
+import ProfileIcon from "@/component/ProfileIcon";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 type Inputs = {
   email: string;
-  password: number;
+  password: string;
 };
 
 const Login = () => {
   const router = useRouter();
-  // states
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<stateProps>({
-    message: "",
-    status: false,
-  });
 
   const {
     handleSubmit,
@@ -29,117 +28,128 @@ const Login = () => {
     formState: { errors },
   } = useForm<Inputs>();
 
-  // handles login logic
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
       setLoading(true);
-      const response = await axiosInstance.post("/api/users", data);
-      toast.success(response?.data.message);
+      const response = await axiosInstance.post("/api/users/login", data);
+      toast.success(response?.data.message || "Logged in successfully!");
       setLoading(false);
       router.push("/");
     } catch (error: any) {
       setLoading(false);
-      setError({
-        message: error.response?.data.message || error.message,
-        status: true,
-      });
-      console.error(
-        "Error in login.tsx :- ",
-        error.response?.data.message || error.message
-      );
+      const errorMessage = error.response?.data.message || error.message;
+      toast.error(errorMessage);
+      console.error("Login error:", errorMessage);
     }
   };
 
   return (
-    <div className=" h-[94vh] lg:h-[90vh]  px-[10%] sm:px-[25%] xl:px-[32%] pt-8 w-full flex flex-col justify-center">
-      {/* Profile Icon */}
-      <ProfileIcon />
-
-      {/* Text */}
-      <h1 className="text-xl lg:text-3xl font-bold ml-1 mt-3"> Welcome Back</h1>
-      <p className="text-sm lg:text-lg font-semibold text-[#00000077] ml-1">
-        {" "}
-        LogIn to continue your expense tracking!!
-      </p>
-
-      {/* login form */}
-      <form
-        className="flex flex-col justify-center items-center gap-3 mt-4"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        {/* email */}
-        <div className="flex flex-col w-full">
-          <label
-            className="ml-1 text-[#000000a7] font-semibold lg:text-lg"
-            htmlFor="email"
-          >
-            Email :
-          </label>
-          <div className="flex gap-1">
-            <input
-              id="email"
-              className="border-2 border-[#0000001d] py-1 px-4 rounded-xl shadow-sm outline-none w-full"
-              type="text"
-              placeholder="Email"
-              {...register("email", { required: true })}
-            />
-            {errors.email && (
-              <span className="text-red-700 font-bold text-sm">*</span>
-            )}
-          </div>
+    <div className="flex flex-col justify-center items-center min-h-[90vh] px-6 font-(family-name:--font-baloo-bhai)">
+      <div className="w-full max-w-[400px] flex flex-col">
+        {/* Profile Icon */}
+        <div className="mb-4 self-start lg:self-center">
+          <ProfileIcon />
         </div>
 
-        {/* password */}
-        <div className="flex flex-col w-full ">
-          <label
-            className="ml-1 text-[#000000a7] font-semibold lg:text-lg"
-            htmlFor="password"
-          >
-            Password :
-          </label>
-          <div className="flex gap-1">
-            <input
-              id="password"
-              className="border-2 border-[#0000001d] py-1 px-4 rounded-xl shadow-sm outline-none w-full"
-              type="text"
-              placeholder="Password"
-              {...register("password", { required: true })}
-            />
-            {errors.password && (
-              <span className="text-red-700 font-bold text-sm">*</span>
-            )}
+        {/* Header Text */}
+        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">
+          Welcome Back
+        </h1>
+        <p className="text-sm lg:text-lg font-semibold text-slate-500 mb-6">
+          LogIn to continue your expense tracking!!
+        </p>
+
+        {/* Login Form */}
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+          {/* Email */}
+          <div className="flex flex-col gap-1.5 w-full">
+            <Label
+              className="ml-1 text-slate-700 font-bold text-base"
+              htmlFor="email"
+            >
+              Email :
+            </Label>
+            <div className="relative">
+              <Input
+                id="email"
+                className={`h-11 border-slate-200 rounded-xl shadow-sm focus-visible:ring-green-600 px-4 ${
+                  errors.email ? "border-red-500" : ""
+                }`}
+                type="email"
+                placeholder="Email"
+                {...register("email", { required: true })}
+              />
+              {errors.email && (
+                <span className="absolute right-3 top-2.5 text-red-600 font-bold">
+                  *
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* forgot password */}
-          <p className="text-right text-sm lg:text-lg font-semibold mt-1 mr-2">
-            Forgot your password?{" "}
-            <Link className="font-bold text-green-600" href={"/"}>
-              Reset
-            </Link>
-          </p>
-        </div>
-        <input
-          className="bg-green-600 text-white font-bold px-6 py-2 rounded-2xl mt-3 shadow-sm"
-          type="submit"
-        />
-      </form>
+          {/* Password */}
+          <div className="flex flex-col gap-1.5 w-full">
+            <div className="flex justify-between items-center mr-1">
+              <Label
+                className="ml-1 text-slate-700 font-bold text-base"
+                htmlFor="password"
+              >
+                Password :
+              </Label>
+              <Link
+                className="text-xs font-bold text-green-600 hover:text-green-700"
+                href="/"
+              >
+                Forgot?
+              </Link>
+            </div>
+            <div className="relative">
+              <Input
+                id="password"
+                className={`h-11 border-slate-200 rounded-xl shadow-sm focus-visible:ring-green-600 px-4 ${
+                  errors.password ? "border-red-500" : ""
+                }`}
+                type="password"
+                placeholder="Password"
+                {...register("password", { required: true })}
+              />
+              {errors.password && (
+                <span className="absolute right-3 top-2.5 text-red-600 font-bold">
+                  *
+                </span>
+              )}
+            </div>
+          </div>
 
-      {/* seperator */}
-      <div className="flex items-center w-full my-4">
-        <div className="grow border-t border-gray-300"></div>
-        <span className="px-3 text-sm lg:text-lg text-gray-500 font-medium">
-          OR
-        </span>
-        <div className="grow border-t border-gray-300"></div>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold h-11 rounded-xl shadow-sm mt-4 transition-all active:scale-95"
+          >
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign In"}
+          </Button>
+        </form>
+
+        {/* Separator */}
+        <div className="flex items-center w-full my-8">
+          <div className="grow border-t border-slate-200"></div>
+          <span className="px-4 text-xs text-slate-400 font-bold uppercase tracking-widest">
+            OR
+          </span>
+          <div className="grow border-t border-slate-200"></div>
+        </div>
+
+        {/* Register Link */}
+        <p className="text-center text-sm lg:text-base font-medium text-slate-600">
+          Don&apos;t have an account?{" "}
+          <Link
+            className="font-bold text-green-600 hover:underline underline-offset-4"
+            href="/auth/register"
+          >
+            SignUp
+          </Link>
+        </p>
       </div>
-
-      {/* register */}
-      <p className="text-center w-full lg:text-lg">
-        Don't have an account?{" "}
-        <Link className="font-bold text-green-600" href={"/auth/register"}>
-          SignUp
-        </Link>
-      </p>
     </div>
   );
 };

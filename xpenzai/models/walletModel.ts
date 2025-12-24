@@ -1,7 +1,7 @@
 import mongoose, { model, Model, Schema } from "mongoose";
 
 export interface walletMembers {
-  userId: mongoose.Schema.Types.ObjectId;
+  userId: string;
   totalContribution: number;
 }
 
@@ -30,16 +30,22 @@ const walletSchema = new Schema<walletType>({
     default: 0,
   },
 
-  members: [
-    {
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
+  members: {
+    type: [
+      {
+        userId: {
+          type: String,
+          ref: "User",
+          required: true,
+        },
+        totalContribution: {
+          type: Number,
+          default: 0,
+        },
       },
-      totalContribution: Number,
-    },
-  ],
+    ],
+    required: true,
+  },
 });
 
 const Wallet: Model<walletType> =

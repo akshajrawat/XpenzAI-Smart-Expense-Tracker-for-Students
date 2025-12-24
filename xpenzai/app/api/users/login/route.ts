@@ -5,6 +5,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import sendEmail from "@/utils/mailer";
 import { Types } from "mongoose";
+import Wallet from "@/models/walletModel";
 
 export interface tokenTypes extends JwtPayload {
   id: Types.ObjectId;
@@ -15,7 +16,7 @@ export interface tokenTypes extends JwtPayload {
 
 export async function POST(request: NextRequest) {
   await connectDb();
-  
+
   try {
     const reqBody = await request.json();
     const { email, password } = reqBody;
@@ -69,6 +70,34 @@ export async function POST(request: NextRequest) {
     const token = jwt.sign(tokenPayload, process.env.TOKEN_SECRET!, {
       expiresIn: "7d",
     });
+
+    // check if the user already has a wallet created or not
+    if (user.isWalletCreated === false) {
+      try {
+        await Wallet.create({
+          name: "Personal-Wallet",
+          type: "Personal",
+          balanceInPaise: 0,
+          members: [
+            {
+              userId: user._id,
+              totalContribution: 0,
+            },
+          ],
+        });
+        user.isWalletCreated = true;
+        await user.save();
+      } catch (error) {
+        return NextResponse.json(
+          {
+            message:
+              "There was some problem while creating wallet during login",
+            error,
+          },
+          { status: 400 }
+        );
+      }
+    }
 
     // response
     const response = NextResponse.json(

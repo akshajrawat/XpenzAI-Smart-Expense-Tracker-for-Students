@@ -6,6 +6,7 @@ export interface UserType extends Document {
   username: string;
   email: string;
   password: string;
+  isWalletCreated: boolean;
   walletBalanceInPaise: number;
   isVerified: boolean;
   isAdmin: boolean;
@@ -31,6 +32,11 @@ const userSchema = new Schema<UserType>({
   password: {
     type: String,
     required: [true, "Please provide an email"],
+  },
+
+  isWalletCreated: {
+    type: Boolean,
+    default: false,
   },
 
   isVerified: {

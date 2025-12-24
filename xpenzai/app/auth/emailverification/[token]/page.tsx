@@ -1,22 +1,26 @@
 "use client";
-import ErrorMessage from "@/component/ErrorMessage";
-import Loading from "@/component/Loading";
-import ProfileIcon from "@/component/ProfileIcon";
-import axiosInstance from "@/utils/axios";
-import { useParams } from "next/navigation";
-import { useRouter } from "next/navigation";
+
 import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { Loader2, MailCheck } from "lucide-react";
+
+import axiosInstance from "@/utils/axios";
+import ProfileIcon from "@/component/ProfileIcon";
+import ErrorMessage from "@/component/ErrorMessage";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 
 export interface stateProps {
   message: string;
   status: boolean;
 }
+
 const EmailVerification = () => {
   const params = useParams<{ token: string }>();
   const router = useRouter();
 
-  // states
   const [token, setToken] = useState<string>("");
   const [error, setError] = useState<stateProps>({
     message: "",
@@ -24,20 +28,17 @@ const EmailVerification = () => {
   });
   const [loading, setLoading] = useState<boolean>(false);
 
-  // set token to the state
   useEffect(() => {
     if (params?.token) {
       setToken(params.token);
     }
   }, [params]);
 
-  // send req to server
   const handleEmailVerification = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.post("/api/users/verifyemail", { token });
+      await axiosInstance.post("/api/users/verifyemail", { token });
       setLoading(false);
-      toast.success(res?.data.message);
       router.push("/auth/login");
     } catch (error: any) {
       setLoading(false);
@@ -45,39 +46,76 @@ const EmailVerification = () => {
         message: error.response?.data.message || error.message,
         status: true,
       });
-      console.error(
-        " Backend error in emailverification:",
-        error.response?.data || error.message
-      );
     }
   };
 
   return (
-    <div className="flex flex-col justify-center items-center w-full h-[80vh] bg-green-50">
-      <div className="flex flex-col justify-center items-center shadow-md py-6 xl:px-10 px-6 rounded-2xl bg-white border border-green-100">
-        {/* Profile Icon */}
-        <ProfileIcon />
+    <div className="flex flex-col items-center justify-center min-h-[90vh] px-4 font-(family-name:--font-baloo-bhai)">
+      <div className="w-full max-w-[450px]">
+        <Card className="border-none shadow-2xl shadow-green-900/10 bg-white/80 backdrop-blur-md rounded-[2.5rem] overflow-hidden">
+          <CardContent className="pt-12 pb-10 px-8 flex flex-col items-center">
+            {/* Header Content INSIDE the Card */}
+            <div className="flex flex-col items-center text-center space-y-4 mb-8">
+              <div className="transform transition-transform hover:scale-110 duration-300">
+                <ProfileIcon />
+              </div>
 
-        <h1 className="text-xl lg:text-3xl font-semibold text-green-700 mt-3">
-          Email Verification ✅
-        </h1>
+              <div className="space-y-2">
+                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                  Verify Email
+                </h1>
+                <p className="text-slate-500 font-semibold px-2">
+                  You&apos;re almost there! Click below to activate your account
+                  and set up your wallet.
+                </p>
+              </div>
+            </div>
 
-        <p className="text-sm lg:text-lg font-medium text-gray-600 mt-1 text-center">
-          Click the button below to verify your email:
-        </p>
+            {/* Visual Confirmation Icon */}
+            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-8 border border-green-100 shadow-inner">
+              <MailCheck className="w-10 h-10 text-green-600" />
+            </div>
 
-        {/* Button */}
-        <button
-          onClick={handleEmailVerification}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-full mt-4 shadow-sm transition-all duration-200"
-        >
-          Verify Email
-        </button>
-        {/* error message */}
-        {error.status && <ErrorMessage message={error.message} />}
+            {/* Action Button */}
+            <Button
+              onClick={handleEmailVerification}
+              disabled={loading || !token}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold h-14 rounded-2xl shadow-lg shadow-green-600/20 transition-all duration-300 active:scale-[0.98]"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin text-white" />
+                  <span>Verifying...</span>
+                </div>
+              ) : (
+                "Verify & Get Started"
+              )}
+            </Button>
 
-        {/* loading state */}
-        {loading && <Loading message="" />}
+            {/* Error Message Section */}
+            {error.status && (
+              <div className="mt-6 w-full animate-in fade-in slide-in-from-top-2">
+                <ErrorMessage message={error.message} />
+              </div>
+            )}
+
+            {!token && !loading && (
+              <p className="mt-4 text-xs text-red-500 font-bold uppercase tracking-widest bg-red-50 px-3 py-1 rounded-full">
+                Invalid or Missing Token
+              </p>
+            )}
+
+            {/* Link inside the card */}
+            <div className="mt-8">
+              <Link
+                href="/auth/login"
+                className="text-slate-400 text-xs font-bold hover:text-green-600 transition-colors uppercase tracking-widest"
+              >
+                Back to Login
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
