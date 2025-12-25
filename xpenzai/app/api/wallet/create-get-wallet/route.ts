@@ -1,6 +1,7 @@
 import connectDb from "@/config/dbConfig";
 import User from "@/models/userModel";
 import Wallet, { walletMembers } from "@/models/walletModel";
+import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -13,15 +14,16 @@ export async function POST(request: NextRequest) {
       type,
       members,
     }: { name: string; type: string; members: walletMembers[] } = reqBody;
-    const id = request.headers.get("x-user-id");
+    const headerId = request.headers.get("x-user-id");
 
-    if (!id) {
+    if (!headerId) {
       return NextResponse.json(
         { message: "Unable to fetch id from headers" },
         { status: 400 }
       );
     }
 
+    const id: Types.ObjectId = new Types.ObjectId(headerId);
     // check if all the field are present
     if (!name || !type) {
       return NextResponse.json(
@@ -39,8 +41,8 @@ export async function POST(request: NextRequest) {
     }
 
     // add initial userId if not added yet
-    const uniqueMembers = new Set(members.map((m) => m.userId.toString()));
-    uniqueMembers.add(id.toString());
+    const uniqueMembers = new Set(members.map((m) => m.userId));
+    uniqueMembers.add(id);
 
     // convert back to array
     const finalMembers: walletMembers[] = Array.from(uniqueMembers).map(
@@ -65,6 +67,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
+
+// GET ALL THE WALLETS OF THE USER
 export async function GET(request: NextRequest) {
   await connectDb();
 

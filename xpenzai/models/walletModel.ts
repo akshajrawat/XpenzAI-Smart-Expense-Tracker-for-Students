@@ -1,7 +1,7 @@
-import mongoose, { model, Model, Schema } from "mongoose";
+import mongoose, { model, Model, Schema, Types } from "mongoose";
 
 export interface walletMembers {
-  userId: string;
+  userId: Types.ObjectId;
   totalContribution: number;
 }
 
@@ -34,7 +34,7 @@ const walletSchema = new Schema<walletType>({
     type: [
       {
         userId: {
-          type: String,
+          type: Types.ObjectId,
           ref: "User",
           required: true,
         },

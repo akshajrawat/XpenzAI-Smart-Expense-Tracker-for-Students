@@ -9,8 +9,36 @@ import {
   Wallet as WalletIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import axiosInstance from "@/utils/axios";
+import toast from "react-hot-toast";
+import { walletType } from "@/models/walletModel";
 
-const Page = () => {
+const Overview = () => {
+  const [wallets, setWallets] = useState<walletType[]>([]);
+
+  // use effect for fetching data
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axiosInstance.get("/api/wallet/create-get-wallet");
+        const data = res.data;
+        setWallets(data.wallets);
+
+        // problem
+        toast.success(data.message);
+      } catch (error: any) {
+        toast.error(
+          error.response.data.message || "Error while fetching wallet"
+        );
+        console.error("Error while fetching in useEffect :-", error);
+      }
+    })();
+  }, []);
+
+  const personalWallet: walletType | undefined = wallets.find(
+    (wallet) => wallet.type === "Personal"
+  );
   return (
     <div className="p-2 md:p-4 space-y-6 font-(family-name:--font-baloo-bhai)">
       {/* Wallet Section */}
@@ -29,7 +57,7 @@ const Page = () => {
               </p>
               <div className="flex items-baseline gap-2 mb-6">
                 <h2 className="text-4xl md:text-6xl font-extrabold text-slate-900">
-                  $ 100.00
+                  {personalWallet?.balanceInPaise ?? "0"}
                 </h2>
                 <span className="text-slate-400 font-bold text-lg">USD</span>
               </div>
@@ -109,4 +137,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default Overview;
