@@ -3,7 +3,7 @@ import mongoose, { model, Model, models, Schema } from "mongoose";
 export interface transactionType {
   walletId: mongoose.Schema.Types.ObjectId;
   userId: mongoose.Schema.Types.ObjectId;
-  balanceInPaise: number;
+  balanceInMin: number;
   type: "Expense" | "Add_Money" | "Contribution";
   category: string;
 }
@@ -21,7 +21,7 @@ const transactionModel = new Schema<transactionType>({
     required: true,
   },
 
-  balanceInPaise: {
+  balanceInMin: {
     type: Number,
     default: 0,
   },

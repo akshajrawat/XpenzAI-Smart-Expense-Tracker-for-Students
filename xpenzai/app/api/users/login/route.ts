@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
         await Wallet.create({
           name: "Personal-Wallet",
           type: "Personal",
-          balanceInPaise: 0,
+          balanceInMin: 0,
           members: [
             {
               userId: user._id,
@@ -106,6 +106,9 @@ export async function POST(request: NextRequest) {
     );
     response.cookies.set("token", token, {
       httpOnly: true,
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
     });
 
     return response;

@@ -7,38 +7,50 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   Wallet as WalletIcon,
+  DollarSign,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/utils/axios";
 import toast from "react-hot-toast";
 import { walletType } from "@/models/walletModel";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useUser } from "@/providers/UserProvider";
 
 const Overview = () => {
   const [wallets, setWallets] = useState<walletType[]>([]);
+  const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
+  const [amount, setAmount] = useState("");
 
-  // use effect for fetching data
+  // get user
+  const { user } = useUser();
+  console.log(user);
+  // Fetching data
   useEffect(() => {
     (async () => {
       try {
         const res = await axiosInstance.get("/api/wallet/create-get-wallet");
-        const data = res.data;
-        setWallets(data.wallets);
-
-        // problem
-        toast.success(data.message);
+        setWallets(res.data.wallets);
       } catch (error: any) {
         toast.error(
-          error.response.data.message || "Error while fetching wallet"
+          error.response?.data?.message || "Error while fetching wallet"
         );
-        console.error("Error while fetching in useEffect :-", error);
       }
     })();
   }, []);
 
-  const personalWallet: walletType | undefined = wallets.find(
-    (wallet) => wallet.type === "Personal"
-  );
+  const personalWallet = wallets.find((wallet) => wallet.type === "Personal");
+
   return (
     <div className="p-2 md:p-4 space-y-6 font-(family-name:--font-baloo-bhai)">
       {/* Wallet Section */}
@@ -57,15 +69,68 @@ const Overview = () => {
               </p>
               <div className="flex items-baseline gap-2 mb-6">
                 <h2 className="text-4xl md:text-6xl font-extrabold text-slate-900">
-                  {personalWallet?.balanceInPaise ?? "0"}
+                  {personalWallet?.balanceInMin
+                    ? (personalWallet.balanceInMin / 100).toFixed(2)
+                    : "0.00"}
                 </h2>
                 <span className="text-slate-400 font-bold text-lg">USD</span>
               </div>
 
               <div className="flex gap-3">
-                <Button className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 rounded-xl h-11 transition-all active:scale-95 shadow-sm shadow-green-600/20">
-                  <Plus className="w-4 h-4 mr-2" /> Add Money
-                </Button>
+                {/* ADD MONEY POPUP */}
+                <Dialog open={isAddMoneyOpen} onOpenChange={setIsAddMoneyOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 rounded-xl h-11 transition-all active:scale-95 shadow-sm shadow-green-600/20">
+                      <Plus className="w-4 h-4 mr-1" /> Add Money
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[420px] rounded-4xl border-2 border-slate-100 p-8">
+                    <DialogHeader className="flex flex-col items-center text-center">
+                      <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mb-4">
+                        <Plus className="w-7 h-7 text-green-600 stroke-[3px]" />
+                      </div>
+                      <DialogTitle className="text-2xl font-extrabold text-slate-900">
+                        Add Money
+                      </DialogTitle>
+                      <p className="text-slate-500 font-bold text-sm">
+                        Enter the amount to add to your wallet
+                      </p>
+                    </DialogHeader>
+
+                    <div className="py-6 space-y-2">
+                      <Label
+                        htmlFor="amount"
+                        className="text-slate-700 font-bold ml-1"
+                      >
+                        Amount (USD)
+                      </Label>
+                      <div className="relative group">
+                        <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-green-600 transition-colors" />
+                        <Input
+                          id="amount"
+                          type="number"
+                          placeholder="0.00"
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                          className="h-14 pl-11 rounded-2xl border-2 border-slate-100 bg-slate-50/50 focus-visible:ring-green-600 font-bold text-xl outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <DialogFooter>
+                      <Button
+                        className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded-2xl shadow-lg shadow-green-600/20 transition-all active:scale-95"
+                        onClick={() => {
+                          console.log("Amount to add:", amount);
+                          setIsAddMoneyOpen(false);
+                        }}
+                      >
+                        Confirm Deposit
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
                 <Button
                   variant="outline"
                   className="border-2 border-slate-100 text-slate-600 font-bold px-6 rounded-xl h-11 hover:bg-slate-50 transition-all"
@@ -76,7 +141,7 @@ const Overview = () => {
             </CardContent>
           </Card>
 
-          {/* Quick Stats: Income & Expenses */}
+          {/* Quick Stats */}
           <div className="flex flex-col gap-4 justify-between">
             <Card className="flex-1 border-2 border-slate-100 shadow-sm rounded-2xl p-4 flex items-center gap-4 bg-white">
               <div className="bg-green-100 p-3 rounded-xl">
@@ -105,7 +170,7 @@ const Overview = () => {
         </div>
       </div>
 
-      {/* Transactions Table Section */}
+      {/* Recent Transactions Placeholder */}
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4 px-1">
           <h3 className="font-bold text-xl text-slate-800">

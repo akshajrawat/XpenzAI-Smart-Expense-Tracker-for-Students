@@ -7,7 +7,7 @@ export interface UserType extends Document {
   email: string;
   password: string;
   isWalletCreated: boolean;
-  walletBalanceInPaise: number;
+  currency: "USD" | "INR";
   isVerified: boolean;
   isAdmin: boolean;
   forgotPasswordToken?: string;
@@ -49,11 +49,11 @@ const userSchema = new Schema<UserType>({
     default: false,
   },
 
-  walletBalanceInPaise: {
-    type: Number,
-    default: 0,
+  currency: {
+    type: String,
+    enum: ["USD", "INR"],
+    default: "INR",
   },
-
   forgotPasswordToken: String,
   forgotPasswordTokenExpiry: Date,
   verifyToken: String,

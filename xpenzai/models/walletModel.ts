@@ -8,7 +8,7 @@ export interface walletMembers {
 export interface walletType extends Document {
   name: string;
   type: "Personal" | "Shared";
-  balanceInPaise: number;
+  balanceInMin: number;
   members: walletMembers[];
 }
 
@@ -25,7 +25,7 @@ const walletSchema = new Schema<walletType>({
     required: true,
   },
 
-  balanceInPaise: {
+  balanceInMin: {
     type: Number,
     default: 0,
   },

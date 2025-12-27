@@ -8,8 +8,8 @@ export async function GET(request: NextRequest) {
 
   try {
     // extract id from token
-    const id = await getInformationFromToken(request);
 
+    const id = await getInformationFromToken(request);
     if (!id) {
       return NextResponse.json(
         { message: "Id did not received in api/me" },
@@ -19,11 +19,14 @@ export async function GET(request: NextRequest) {
 
     //   get the user from the database
     const user = await User.findById(id).select("-password");
+
     if (!user) {
-      return NextResponse.json(
+      const res = NextResponse.json(
         { message: "User not found in api/me" },
         { status: 404 }
       );
+      res.cookies.delete("token");
+      return res;
     }
 
     return NextResponse.json({ user });

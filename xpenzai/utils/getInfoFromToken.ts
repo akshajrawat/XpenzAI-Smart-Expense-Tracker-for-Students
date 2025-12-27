@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { tokenTypes } from "@/app/api/users/login/route";
 
-
 export async function getInformationFromToken(request: NextRequest) {
   try {
     // extract token

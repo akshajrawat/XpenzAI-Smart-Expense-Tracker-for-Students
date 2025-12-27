@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     const newWallet = await Wallet.create({
       name,
       type,
-      balanceInPaise: 0,
+      balanceInMin: 0,
       members: finalMembers,
     });
 
@@ -66,7 +66,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error }, { status: 500 });
   }
 }
-
 
 // GET ALL THE WALLETS OF THE USER
 export async function GET(request: NextRequest) {
