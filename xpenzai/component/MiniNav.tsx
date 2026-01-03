@@ -20,7 +20,7 @@ const MiniNav = () => {
   const pageTitle = pathname.split("/")[1]?.toUpperCase() || "DASHBOARD";
 
   return (
-    <div className="py-2.5 flex justify-between items-center px-3 font-semibold text-lg md:text-2xl border-b-2 md:py-4 md:px-6 md:font-bold">
+    <div className="py-2.5 flex justify-between items-center px-3 font-semibold text-lg md:text-2xl border-b-2 md:py-3.5 lg:py-4 md:px-6 md:font-bold">
       {/* Mobile Sidebar Trigger */}
       <div className="md:hidden flex items-center">
         <Sheet>

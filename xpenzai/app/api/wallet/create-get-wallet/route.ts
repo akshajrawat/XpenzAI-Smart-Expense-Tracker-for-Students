@@ -81,6 +81,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const user = await User.findById(id);
+    if (!user) {
+      return NextResponse.json({ message: "No User Exist" }, { status: 401 });
+    }
+
     // find wallet
     const wallets = await Wallet.find({
       "members.userId": id,

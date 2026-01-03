@@ -21,12 +21,10 @@ export async function GET(request: NextRequest) {
     const user = await User.findById(id).select("-password");
 
     if (!user) {
-      const res = NextResponse.json(
+      return NextResponse.json(
         { message: "User not found in api/me" },
-        { status: 404 }
+        { status: 401 }
       );
-      res.cookies.delete("token");
-      return res;
     }
 
     return NextResponse.json({ user });

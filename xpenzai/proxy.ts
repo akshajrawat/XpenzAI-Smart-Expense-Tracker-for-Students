@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose"; //
 import { tokenTypes } from "@/app/api/users/login/route";
 
 // public api that anyone can hit
@@ -14,7 +14,7 @@ const NO_TOKEN_PATH: string[] = ["/auth"];
 // paths that user can hit when they have  token
 const TOKEN_PATH: string[] = ["/overview"];
 
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const token = req.cookies.get("token")?.value;
 
@@ -22,8 +22,12 @@ export function proxy(req: NextRequest) {
 
   if (token) {
     try {
-      // verify token and get user from it
-      user = jwt.verify(token, process.env.TOKEN_SECRET!) as tokenTypes;
+      // we are encoding our token secret for edge time running of next js proxy
+      const secret = new TextEncoder().encode(process.env.TOKEN_SECRET!);
+
+      // getting payload from the jwt token
+      const { payload } = await jwtVerify(token, secret);
+      user = payload as unknown as tokenTypes;
     } catch (error: any) {
       user = null;
     }

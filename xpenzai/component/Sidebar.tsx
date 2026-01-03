@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils"; // shadcn utility for conditional classes
+import { useUser } from "@/providers/UserProvider";
 
 export const sidebarLinks = [
   {
@@ -55,7 +56,7 @@ export const sidebarLinks = [
 
 const Sidebar = () => {
   const pathname = usePathname();
-
+  const { user } = useUser();
   return (
     <div className="hidden md:flex md:flex-col w-64 lg:w-72 border-r bg-white min-h-screen font-(family-name:--font-baloo-bhai)">
       {/* Header / Logo */}
@@ -104,7 +105,7 @@ const Sidebar = () => {
           </div>
           <div className="flex flex-col overflow-hidden">
             <span className="text-sm font-bold text-slate-700 truncate">
-              John Doe
+              {user.username}
             </span>
             <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">
               Personal Account

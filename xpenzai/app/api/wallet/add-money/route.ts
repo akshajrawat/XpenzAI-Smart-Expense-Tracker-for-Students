@@ -3,7 +3,7 @@ import connectDb from "@/config/dbConfig";
 import { Types } from "mongoose";
 import Wallet from "@/models/walletModel";
 
-export async function name(request: NextRequest) {
+export async function POST(request: NextRequest) {
   await connectDb();
   try {
     const reqBody = await request.json();
@@ -46,6 +46,15 @@ export async function name(request: NextRequest) {
 
     // update wallet balance
     wallet.balanceInMin += amountToAdd;
+    await wallet.save();
+
+    return NextResponse.json(
+      {
+        message: "Successfully added amount to the wallet!!",
+        amount: amountToAdd,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
   }

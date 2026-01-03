@@ -5,14 +5,10 @@ import { tokenTypes } from "@/app/api/users/login/route";
 export async function getInformationFromToken(request: NextRequest) {
   try {
     // extract token
-    const token = request.cookies.get("token")?.value || "";
+    const token = request.cookies.get("token")?.value;
 
-    if (!token) {
-      return NextResponse.json(
-        { message: "Token Invalid or Does not exist" },
-        { status: 404 }
-      );
-    }
+    if (!token) return null;
+    
     const decodedToken = jwt.verify(
       token,
       process.env.TOKEN_SECRET!
