@@ -4,6 +4,7 @@ import Wallet, { walletMembers } from "@/models/walletModel";
 import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
+// CREATE WALLET
 export async function POST(request: NextRequest) {
   await connectDb();
 
@@ -67,12 +68,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET ALL THE WALLETS OF THE USER
+// GET ALL THE WALLETS OF THE USER OR IF THE TYPE IS PROVIDED ONLY THE TYPE ONE
 export async function GET(request: NextRequest) {
   await connectDb();
 
   try {
     const id = request.headers.get("x-user-id");
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type");
 
     if (!id) {
       return NextResponse.json(
@@ -86,21 +89,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: "No User Exist" }, { status: 401 });
     }
 
-    // find wallet
-    const wallets = await Wallet.find({
+    // create filter
+    const filter: any = {
       "members.userId": id,
-    });
-
-    if (!wallets) {
-      return NextResponse.json(
-        { message: "User does not have a wallet yet." },
-        { status: 400 }
-      );
+    };
+    if (type) {
+      filter.type = type;
     }
+
+    // find wallet
+    const wallets = await Wallet.find(filter).lean();
 
     // return response
     return NextResponse.json(
-      { message: "Wallets fetched", wallets },
+      {
+        message: wallets.length === 0 ? "No wallet found" : "Wallet fetched",
+        wallets,
+      },
       { status: 200 }
     );
   } catch (error) {

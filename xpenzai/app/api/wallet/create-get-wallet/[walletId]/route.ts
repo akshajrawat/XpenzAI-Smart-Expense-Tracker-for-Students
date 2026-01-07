@@ -2,6 +2,7 @@ import connectDb from "@/config/dbConfig";
 import Wallet from "@/models/walletModel";
 import { NextResponse } from "next/server";
 
+// GET A SPECIFIC WALLET OF THE USER
 export async function GET({ params }: any) {
   await connectDb();
 

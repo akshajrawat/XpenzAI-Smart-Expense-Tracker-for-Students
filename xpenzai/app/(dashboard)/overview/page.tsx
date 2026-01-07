@@ -7,7 +7,6 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   Wallet as WalletIcon,
-  DollarSign,
   ChevronDown,
   Check,
 } from "lucide-react";
@@ -32,7 +31,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useUser } from "@/providers/UserProvider";
 
 // 1. Define Currency Config
 const CURRENCIES = {

@@ -1,7 +1,12 @@
 import MiniNav from "@/component/MiniNav";
 import Sidebar from "@/component/Sidebar";
-import UserProvider from "@/providers/UserProvider";
-import axiosInstance from "@/utils/axios";
+import { fetchUser } from "@/hook/userHook";
+import QueryProvider from "@/providers/QueryProvider";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
 import { cookies } from "next/headers";
 
 export default async function DashboardLayout({
@@ -9,33 +14,31 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const queryClient = new QueryClient();
   const cookieStore = await cookies();
-  let user = null;
-  try {
-    const res = await axiosInstance.get("/api/users/me", {
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-    });
-    user = res.data.user;
-    console.log("success");
-  } catch (error: any) {
-    console.log(error.response.data.message || "problem in layout");
-  }
+  const cookieString = cookieStore.toString();
+
+  await queryClient.prefetchQuery({
+    queryKey: ["user"],
+    queryFn: () => fetchUser(cookieString),
+  });
+
   return (
-    <UserProvider initialUser={user}>
-      <section className="flex w-full h-full">
-        {/* sidebar */}
-        <aside className="hidden md:block">
-          <Sidebar />
-        </aside>
-        <div className="max-h-screen w-full overflow-y-scroll">
-          {/* mini nav */}
-          <MiniNav />
-          {/* main */}
-          <div className="p-6">{children}</div>{" "}
-        </div>
-      </section>
-    </UserProvider>
+    <QueryProvider>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <section className="flex w-full h-full">
+          {/* sidebar */}
+          <aside className="hidden md:block">
+            <Sidebar />
+          </aside>
+          <div className="max-h-screen w-full overflow-y-scroll">
+            {/* mini nav */}
+            <MiniNav />
+            {/* main */}
+            <div className="p-6">{children}</div>{" "}
+          </div>
+        </section>
+      </HydrationBoundary>
+    </QueryProvider>
   );
 }
