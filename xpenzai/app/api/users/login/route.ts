@@ -101,7 +101,18 @@ export async function POST(request: NextRequest) {
 
     // response
     const response = NextResponse.json(
-      { message: "User login successfull", success: true },
+      {
+        message: "User login successfull",
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          isWalletCreated: user.isWalletCreated,
+          isVerified: user.isVerified,
+          isAdmin: user.isAdmin,
+        },
+        success: true,
+      },
       { status: 200 }
     );
     response.cookies.set("token", token, {

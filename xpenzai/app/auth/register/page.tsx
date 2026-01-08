@@ -1,47 +1,30 @@
 "use client";
 
-import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
-
-import axiosInstance from "@/utils/axios";
 import ProfileIcon from "@/component/ProfileIcon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useRegisterUser } from "@/hook/authHook";
 
-interface Inputs {
+export interface RegisterInputs {
   username: string;
   email: string;
   password: string;
 }
 
 const Register = () => {
-  const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
-
+  const { mutate, isPending } = useRegisterUser();
   const {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm<Inputs>();
+  } = useForm<RegisterInputs>();
 
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.post("/api/users/signup", data);
-      toast.success(response?.data.message || "Account created successfully!");
-      setLoading(false);
-      router.push("/auth/login");
-    } catch (error: any) {
-      setLoading(false);
-      const errorMessage = error.response?.data.message || error.message;
-      toast.error(errorMessage);
-      console.error("Error in register.tsx :- ", errorMessage);
-    }
+  const onSubmit: SubmitHandler<RegisterInputs> = async (data) => {
+    mutate(data);
   };
 
   return (
@@ -136,10 +119,14 @@ const Register = () => {
 
           <Button
             type="submit"
-            disabled={loading}
+            disabled={isPending}
             className="bg-green-600 hover:bg-green-700 text-white font-bold h-11 rounded-xl shadow-sm mt-4 transition-all active:scale-95"
           >
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign Up"}
+            {isPending ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              "Sign Up"
+            )}
           </Button>
         </form>
 

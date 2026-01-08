@@ -3,6 +3,7 @@ import "./globals.css";
 import { Baloo_Bhai_2 } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import LayoutWrapper from "@/component/LayoutWrapper";
+import QueryProvider from "@/providers/QueryProvider";
 
 const balooBhai = Baloo_Bhai_2({
   subsets: ["latin"],
@@ -26,8 +27,9 @@ export default async function RootLayout({
         className={`${balooBhai.variable} bg-linear-to-br from-white via-green-50 to-green-200 min-h-screen grid grid-rows-[auto_1fr]`}
       >
         <Toaster position="top-center" reverseOrder={false} />
-
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <QueryProvider>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </QueryProvider>
       </body>
     </html>
   );

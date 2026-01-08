@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { useParams } from "next/navigation";
 import { Loader2, MailCheck } from "lucide-react";
-
-import axiosInstance from "@/utils/axios";
 import ProfileIcon from "@/component/ProfileIcon";
 import ErrorMessage from "@/component/ErrorMessage";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
+import { useVerifyToken } from "@/hook/authHook";
 
 export interface stateProps {
   message: string;
@@ -19,15 +17,8 @@ export interface stateProps {
 
 const EmailVerification = () => {
   const params = useParams<{ token: string }>();
-  const router = useRouter();
-
   const [token, setToken] = useState<string>("");
-  const [error, setError] = useState<stateProps>({
-    message: "",
-    status: false,
-  });
-  const [loading, setLoading] = useState<boolean>(false);
-
+  const { mutate, isPending, isError, error } = useVerifyToken();
   useEffect(() => {
     if (params?.token) {
       setToken(params.token);
@@ -35,18 +26,7 @@ const EmailVerification = () => {
   }, [params]);
 
   const handleEmailVerification = async () => {
-    try {
-      setLoading(true);
-      await axiosInstance.post("/api/users/verifyemail", { token });
-      setLoading(false);
-      router.push("/auth/login");
-    } catch (error: any) {
-      setLoading(false);
-      setError({
-        message: error.response?.data.message || error.message,
-        status: true,
-      });
-    }
+    mutate(token);
   };
 
   return (
@@ -79,10 +59,10 @@ const EmailVerification = () => {
             {/* Action Button */}
             <Button
               onClick={handleEmailVerification}
-              disabled={loading || !token}
+              disabled={isPending || !token}
               className="w-full bg-green-600 hover:bg-green-700 text-white font-bold h-14 rounded-2xl shadow-lg shadow-green-600/20 transition-all duration-300 active:scale-[0.98]"
             >
-              {loading ? (
+              {isPending ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-5 w-5 animate-spin text-white" />
                   <span>Verifying...</span>
@@ -93,13 +73,17 @@ const EmailVerification = () => {
             </Button>
 
             {/* Error Message Section */}
-            {error.status && (
+            {isError && (
               <div className="mt-6 w-full animate-in fade-in slide-in-from-top-2">
-                <ErrorMessage message={error.message} />
+                <ErrorMessage
+                  message={
+                    error?.response?.data.message || "Verification failed!"
+                  }
+                />
               </div>
             )}
 
-            {!token && !loading && (
+            {!token && !isPending && (
               <p className="mt-4 text-xs text-red-500 font-bold uppercase tracking-widest bg-red-50 px-3 py-1 rounded-full">
                 Invalid or Missing Token
               </p>

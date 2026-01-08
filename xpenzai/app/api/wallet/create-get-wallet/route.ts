@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     const filter: any = {
       "members.userId": id,
     };
-    if (type) {
+    if (type?.trim() !== "") {
       filter.type = type;
     }
 

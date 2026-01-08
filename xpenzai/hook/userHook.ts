@@ -20,5 +20,6 @@ export function useUser() {
   return useQuery({
     queryKey: ["user"],
     queryFn: () => fetchUser(),
+    staleTime: 1000 * 60,
   });
 }

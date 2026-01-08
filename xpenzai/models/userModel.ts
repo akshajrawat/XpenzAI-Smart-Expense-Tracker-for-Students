@@ -7,7 +7,6 @@ export interface UserType extends Document {
   email: string;
   password: string;
   isWalletCreated: boolean;
-
   isVerified: boolean;
   isAdmin: boolean;
   forgotPasswordToken?: string;
@@ -49,10 +48,22 @@ const userSchema = new Schema<UserType>({
     default: false,
   },
 
-  forgotPasswordToken: String,
-  forgotPasswordTokenExpiry: Date,
-  verifyToken: String,
-  verifyTokenExpiry: Date,
+  forgotPasswordToken: {
+    type: String,
+    select: false,
+  },
+  forgotPasswordTokenExpiry: {
+    type: Date,
+    select: false,
+  },
+  verifyToken: {
+    type: String,
+    select: false,
+  },
+  verifyTokenExpiry: {
+    type: Date,
+    select: false,
+  },
 });
 
 // NextJs works at edge computing so it usually does not know if the model is already created or is to be created, So in nextjs we export like this :-

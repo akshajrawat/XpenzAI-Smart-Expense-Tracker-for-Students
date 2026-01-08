@@ -12,9 +12,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import axiosInstance from "@/utils/axios";
-import toast from "react-hot-toast";
-import { walletType } from "@/models/walletModel";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDepositeMoney, useGetWallets } from "@/hook/walletHook";
 
 // 1. Define Currency Config
 const CURRENCIES = {
@@ -42,28 +40,16 @@ const CURRENCIES = {
 type CurrencyCode = keyof typeof CURRENCIES;
 
 const Overview = () => {
-  const [wallets, setWallets] = useState<walletType[]>([]);
   const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
   const [amount, setAmount] = useState("0");
-
+  const { data: wallet, isPending, refetch } = useGetWallets("Personal");
+  const { mutate } = useDepositeMoney();
+  console.log(wallet);
   // Currency State
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
 
-  // wallet fetching logic
-  const fetchWallet = async () => {
-    try {
-      const res = await axiosInstance.get("/api/wallet/create-get-wallet");
-      setWallets(res.data.wallets);
-    } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || "Error while fetching wallet"
-      );
-    }
-  };
-
   useEffect(() => {
     (async () => {
-      await fetchWallet();
       const savedCurr = localStorage.getItem("currency") as CurrencyCode;
       if (savedCurr && CURRENCIES[savedCurr]) {
         setCurrency(savedCurr);
@@ -74,10 +60,6 @@ const Overview = () => {
       }
     })();
   }, []);
-
-  const personalWallet: any = wallets.find(
-    (wallet) => wallet.type === "Personal"
-  );
 
   // Helper to Convert Balance
   const getDisplayBalance = (balanceInMin: number | undefined) => {
@@ -93,7 +75,20 @@ const Overview = () => {
 
   // handel amount addition
   const handleSetAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value || "0";
+    let value = e.target.value;
+
+    // 1. If user deletes everything, reset to "0"
+    if (value === "") {
+      setAmount("0");
+      return;
+    }
+
+    // remove leading 0 if its not decimal
+    if (value.length > 1 && value.startsWith("0") && value[1] !== ".") {
+      value = value.replace(/^0+/, "");
+    }
+
+    // prevent negative numbers
     if (parseFloat(value) <= 0) {
       setAmount("0");
     } else {
@@ -106,13 +101,12 @@ const Overview = () => {
     try {
       let amountInPaise: number =
         parseFloat(amount) * CURRENCIES[currency].rate * 100;
-
-      const res = await axiosInstance.post("/api/wallet/add-money", {
-        walletId: personalWallet?._id,
+      const data: { walletId: string; amountToAdd: number } = {
+        walletId: wallet[0]?._id,
         amountToAdd: amountInPaise,
-      });
-      await fetchWallet();
-      toast.success(res?.data.message || "Amount added!!");
+      };
+      // deposite money
+      mutate(data);
       setIsAddMoneyOpen(false);
     } catch (error: any) {
       setIsAddMoneyOpen(false);
@@ -150,7 +144,9 @@ const Overview = () => {
                   <span className="text-3xl md:text-5xl mr-1 text-slate-400">
                     {CURRENCIES[currency].symbol}
                   </span>
-                  {getDisplayBalance(personalWallet?.balanceInMin)}
+                  {!isPending
+                    ? getDisplayBalance(wallet[0]?.balanceInMin)
+                    : "0.00"}
                 </h2>
 
                 {/* Currency Dropdown */}

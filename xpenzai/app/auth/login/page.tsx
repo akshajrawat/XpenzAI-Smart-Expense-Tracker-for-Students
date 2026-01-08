@@ -1,46 +1,28 @@
 "use client";
-
-import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
-
-import axiosInstance from "@/utils/axios";
 import ProfileIcon from "@/component/ProfileIcon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useLoginUser } from "@/hook/authHook";
 
-type Inputs = {
+export type LoginInputs = {
   email: string;
   password: string;
 };
 
 const Login = () => {
-  const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
-
+  const { mutate, isPending } = useLoginUser();
   const {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm<Inputs>();
+  } = useForm<LoginInputs>();
 
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.post("/api/users/login", data);
-      toast.success(response?.data.message || "Logged in successfully!");
-      setLoading(false);
-      router.push("/");
-    } catch (error: any) {
-      setLoading(false);
-      const errorMessage = error.response?.data.message || error.message;
-      toast.error(errorMessage);
-      console.error("Login error:", errorMessage);
-    }
+  const onSubmit: SubmitHandler<LoginInputs> = async (data) => {
+    mutate(data);
   };
 
   return (
@@ -123,10 +105,14 @@ const Login = () => {
 
           <Button
             type="submit"
-            disabled={loading}
+            disabled={isPending}
             className="bg-green-600 hover:bg-green-700 text-white font-bold h-11 rounded-xl shadow-sm mt-4 transition-all active:scale-95"
           >
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign In"}
+            {isPending ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              "Sign In"
+            )}
           </Button>
         </form>
 
