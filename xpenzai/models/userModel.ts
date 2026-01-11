@@ -1,21 +1,17 @@
+import { IUser } from "@/types/userTypes";
 import mongoose, { Schema, Model, Document, Types } from "mongoose";
 
 // defining the type Safety for user
-export interface UserType extends Document {
+interface IUserDocument extends IUser, Document {
   _id: Types.ObjectId;
-  username: string;
-  email: string;
   password: string;
-  isWalletCreated: boolean;
-  isVerified: boolean;
-  isAdmin: boolean;
   forgotPasswordToken?: string;
   forgotPasswordTokenExpiry?: Date;
   verifyToken?: string;
   verifyTokenExpiry?: Date;
 }
 
-const userSchema = new Schema<UserType>({
+const userSchema = new Schema<IUserDocument>({
   username: {
     type: String,
     required: [true, "Please provide a username"],
@@ -67,6 +63,6 @@ const userSchema = new Schema<UserType>({
 });
 
 // NextJs works at edge computing so it usually does not know if the model is already created or is to be created, So in nextjs we export like this :-
-const User: Model<UserType> =
-  mongoose.models.User || mongoose.model<UserType>("User", userSchema);
+const User: Model<IUserDocument> =
+  mongoose.models.User || mongoose.model<IUserDocument>("User", userSchema);
 export default User;

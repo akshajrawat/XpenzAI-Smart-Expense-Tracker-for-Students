@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus,
   Wallet as WalletIcon,
@@ -37,100 +37,72 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Switch } from "@/components/ui/switch"; // For dev toggle
-import toast from "react-hot-toast";
-
-// --- Types & Dummy Data ---
-
-// 1. One default Personal Wallet
-const DUMMY_PERSONAL_WALLET = {
-  _id: "1",
-  name: "My Personal Wallet",
-  type: "Personal",
-  balanceInMin: 4500000, // 45,000.00
-  members: [{ userId: "me", totalContribution: 0 }],
-};
-
-// 2. Multiple Shared Wallets
-const DUMMY_SHARED_WALLETS = [
-  {
-    _id: "2",
-    name: "Goa Trip Fund",
-    type: "Shared",
-    balanceInMin: 1250000, // 12,500.00
-    members: [
-      { userId: "me", totalContribution: 500000 },
-      { userId: "friend1", totalContribution: 750000 },
-    ],
-  },
-  {
-    _id: "3",
-    name: "Flat Expenses",
-    type: "Shared",
-    balanceInMin: 890000, // 8,900.00
-    members: [
-      { userId: "me", totalContribution: 200000 },
-      { userId: "friend2", totalContribution: 200000 },
-      { userId: "friend3", totalContribution: 200000 },
-    ],
-  },
-];
+import { useCreateWallet, useGetWallets } from "@/hook/walletHook";
+import Link from "next/link";
+import { CURRENCIES, CurrencyCode } from "../overview/page";
+import { IWallet } from "@/types/walletType";
+import { useUser } from "@/hook/userHook";
 
 const WalletsPage = () => {
-  const [personalWallet, setPersonalWallet] = useState<any>(null);
-  const [sharedWallets, setSharedWallets] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // Fetching personal and share wallets
+  const { data: personalWallet, isPending: isPersonalPending } =
+    useGetWallets("Personal");
+  const {
+    data: sharedWallet,
+    isPending: isSharedPending,
+    refetch: refetchShared,
+  } = useGetWallets("Shared");
+  const { mutate: createWallet } = useCreateWallet();
+  const { data: user } = useUser();
+  // currency
+  const [currency, setCurrency] = useState<CurrencyCode>("USD");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   // New Wallet Form State (Only for Shared now)
   const [newWalletName, setNewWalletName] = useState("");
 
-  // DEV ONLY: Toggle State
-  const [showDummyData, setShowDummyData] = useState(true);
-
-  // Simulate Fetching Data
+  // useeffect to get the currency from local storage
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      if (showDummyData) {
-        setPersonalWallet(DUMMY_PERSONAL_WALLET);
-        setSharedWallets(DUMMY_SHARED_WALLETS);
+    (async () => {
+      const savedCurr = localStorage.getItem("currency") as CurrencyCode;
+      if (savedCurr && CURRENCIES[savedCurr]) {
+        setCurrency(savedCurr);
       } else {
-        // Even if empty, Personal Wallet should technically always exist for a logged-in user
-        setPersonalWallet(DUMMY_PERSONAL_WALLET);
-        setSharedWallets([]);
+        // Default to USD if nothing is found
+        setCurrency("USD");
+        localStorage.setItem("currency", "USD");
       }
-      setIsLoading(false);
-    }, 600);
-
-    return () => clearTimeout(timer);
-  }, [showDummyData]);
+    })();
+  }, []);
 
   const handleCreateSharedWallet = async () => {
-    if (!newWalletName.trim()) return toast.error("Wallet name is required");
-
-    // Logic to call API (Always type="Shared")
-    toast.success("Shared wallet created successfully!");
-
-    // Optimistic update for demo
-    const newWallet = {
-      _id: Math.random().toString(),
+    const data: IWallet = {
       name: newWalletName,
       type: "Shared",
       balanceInMin: 0,
-      members: [{ userId: "me", totalContribution: 0 }],
+      members: [
+        {
+          userId: user._id,
+          totalContribution: 0,
+        },
+      ],
     };
-    setSharedWallets([...sharedWallets, newWallet]);
-
+    createWallet(data);
+    refetchShared();
     setIsCreateOpen(false);
     setNewWalletName("");
   };
 
-  const formatCurrency = (amountInPaise: number = 0) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-    }).format(amountInPaise / 100);
+  // Changes the balance in minimum in the desired currency
+  const getDisplayBalance = (balanceInMin: number | undefined) => {
+    if (!balanceInMin) return "0.00";
+    // Base is INR paise
+    const baseAmount = balanceInMin / 100;
+    const converted = baseAmount / CURRENCIES[currency].rate;
+    return converted.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   };
 
   return (
@@ -151,18 +123,6 @@ const WalletsPage = () => {
 
         {/* Action Area */}
         <div className="flex items-center gap-3">
-          {/* DEV TOGGLE */}
-          <div className="flex items-center gap-2 bg-slate-100 p-2 rounded-lg border border-slate-200 mr-2">
-            <span className="text-[10px] font-bold text-slate-500 uppercase">
-              Dev:
-            </span>
-            <Switch
-              checked={showDummyData}
-              onCheckedChange={setShowDummyData}
-              className="scale-75"
-            />
-          </div>
-
           <Button
             onClick={() => setIsCreateOpen(true)}
             className="hidden md:flex bg-green-600 hover:bg-green-700 text-white font-bold shadow-lg shadow-green-600/20 active:scale-95 transition-all"
@@ -172,7 +132,7 @@ const WalletsPage = () => {
         </div>
       </div>
 
-      {isLoading ? (
+      {isPersonalPending ? (
         <div className="h-64 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="w-10 h-10 text-green-600 animate-spin" />
           <p className="text-slate-400 font-bold animate-pulse">
@@ -196,7 +156,7 @@ const WalletsPage = () => {
                     Default
                   </Badge>
                   <CardTitle className="text-2xl font-extrabold text-slate-800">
-                    {personalWallet.name}
+                    {personalWallet[0]?.name}
                   </CardTitle>
                   <CardDescription className="text-slate-500 font-medium">
                     Your private funds
@@ -207,16 +167,19 @@ const WalletsPage = () => {
                   <div className="text-sm text-slate-400 font-bold uppercase mb-1">
                     Available Balance
                   </div>
-                  <div className="text-4xl font-black text-slate-900 tracking-tight">
-                    {formatCurrency(personalWallet.balanceInMin)}
+                  <div className="text-4xl font-black text-slate-900 tracking-tight flex gap-1">
+                    <span>{CURRENCIES[currency].symbol}</span>
+                    {getDisplayBalance(personalWallet[0]?.balanceInMin)}
                   </div>
                 </CardContent>
 
                 <CardFooter>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl shadow-lg shadow-blue-600/20">
-                    Manage Personal Funds{" "}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+                  <Link href={"/overview"}>
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl shadow-lg shadow-blue-600/20">
+                      Manage Personal Funds{" "}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
                 </CardFooter>
               </Card>
             ) : (
@@ -242,7 +205,7 @@ const WalletsPage = () => {
               </Button>
             </div>
 
-            {sharedWallets.length === 0 ? (
+            {!isSharedPending && sharedWallet.length === 0 ? (
               <div className="h-64 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-center p-6 bg-slate-50/50">
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 text-slate-300">
                   <Sparkles className="w-6 h-6" />
@@ -264,65 +227,69 @@ const WalletsPage = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {sharedWallets.map((wallet) => (
-                  <Card
-                    key={wallet._id}
-                    className="group relative border border-slate-100 hover:border-green-200 transition-all hover:shadow-lg hover:shadow-green-900/5 bg-white rounded-2xl"
-                  >
-                    {/* Menu Actions */}
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-slate-400 hover:text-slate-800"
+                {!isSharedPending &&
+                  sharedWallet.map((wallet: any) => (
+                    <Card
+                      key={wallet._id}
+                      className="group relative border border-slate-100 hover:border-green-200 transition-all hover:shadow-lg hover:shadow-green-900/5 bg-white rounded-2xl"
+                    >
+                      {/* Menu Actions */}
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-slate-400 hover:text-slate-800"
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="font-bold"
                           >
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="font-bold">
-                          <DropdownMenuItem className="cursor-pointer">
-                            Edit Name
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
-                            Leave Wallet
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                            <DropdownMenuItem className="cursor-pointer">
+                              Edit Name
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+                              Leave Wallet
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
 
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <div className="p-2 bg-purple-50 text-purple-600 rounded-lg mb-3">
-                          <Users className="w-5 h-5" />
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                          <div className="p-2 bg-purple-50 text-purple-600 rounded-lg mb-3">
+                            <Users className="w-5 h-5" />
+                          </div>
                         </div>
-                      </div>
-                      <CardTitle className="text-lg font-extrabold text-slate-800 truncate pr-6">
-                        {wallet.name}
-                      </CardTitle>
-                    </CardHeader>
+                        <CardTitle className="text-lg font-extrabold text-slate-800 truncate pr-6">
+                          {wallet.name}
+                        </CardTitle>
+                      </CardHeader>
 
-                    <CardContent>
-                      <div className="text-2xl font-bold text-slate-900 tracking-tight">
-                        {formatCurrency(wallet.balanceInMin)}
-                      </div>
-                    </CardContent>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-slate-900 tracking-tight">
+                          {getDisplayBalance(wallet.balanceInMin)}
+                        </div>
+                      </CardContent>
 
-                    <CardFooter className="pt-0 border-t border-slate-50 mt-2 p-4 flex justify-between items-center text-xs font-bold text-slate-400">
-                      <div className="flex items-center gap-1">
-                        <span>{wallet.members?.length} Members</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-green-600 hover:text-green-700 font-bold p-0 h-auto hover:bg-transparent"
-                      >
-                        Open &rarr;
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
+                      <CardFooter className="pt-0 border-t border-slate-50 mt-2 p-4 flex justify-between items-center text-xs font-bold text-slate-400">
+                        <div className="flex items-center gap-1">
+                          <span>{wallet.members?.length} Members</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-green-600 hover:text-green-700 font-bold p-0 h-auto hover:bg-transparent"
+                        >
+                          Open &rarr;
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
               </div>
             )}
           </div>

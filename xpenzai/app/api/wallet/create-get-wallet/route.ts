@@ -1,6 +1,7 @@
 import connectDb from "@/config/dbConfig";
 import User from "@/models/userModel";
-import Wallet, { walletMembers } from "@/models/walletModel";
+import Wallet from "@/models/walletModel";
+import { IWalletMembers } from "@/types/walletType";
 import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
       name,
       type,
       members,
-    }: { name: string; type: string; members: walletMembers[] } = reqBody;
+    }: { name: string; type: string; members: IWalletMembers[] } = reqBody;
     const headerId = request.headers.get("x-user-id");
 
     if (!headerId) {
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
     uniqueMembers.add(id);
 
     // convert back to array
-    const finalMembers: walletMembers[] = Array.from(uniqueMembers).map(
+    const finalMembers: IWalletMembers[] = Array.from(uniqueMembers).map(
       (userId) => ({ userId, totalContribution: 0 })
     );
 

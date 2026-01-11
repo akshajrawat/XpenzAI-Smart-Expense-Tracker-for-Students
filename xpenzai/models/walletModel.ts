@@ -1,18 +1,9 @@
+import { IWallet } from "@/types/walletType";
 import mongoose, { model, Model, Schema, Types } from "mongoose";
 
-export interface walletMembers {
-  userId: Types.ObjectId;
-  totalContribution: number;
-}
+interface IWalletDocument extends IWallet, Document {}
 
-export interface walletType extends Document {
-  name: string;
-  type: "Personal" | "Shared";
-  balanceInMin: number;
-  members: walletMembers[];
-}
-
-const walletSchema = new Schema<walletType>({
+const walletSchema = new Schema<IWalletDocument>({
   name: {
     type: String,
     required: [true, "Please provide a name"],
@@ -48,7 +39,7 @@ const walletSchema = new Schema<walletType>({
   },
 });
 
-const Wallet: Model<walletType> =
+const Wallet: Model<IWalletDocument> =
   mongoose.models.Wallet || model("Wallet", walletSchema);
 
 export default Wallet;

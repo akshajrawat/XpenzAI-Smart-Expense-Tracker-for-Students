@@ -31,13 +31,13 @@ import { Label } from "@/components/ui/label";
 import { useDepositeMoney, useGetWallets } from "@/hook/walletHook";
 
 // 1. Define Currency Config
-const CURRENCIES = {
+export const CURRENCIES = {
   USD: { label: "USD", symbol: "$", rate: 90 },
   INR: { label: "INR", symbol: "₹", rate: 1 },
   EUR: { label: "EUR", symbol: "€", rate: 105 },
 };
 
-type CurrencyCode = keyof typeof CURRENCIES;
+export type CurrencyCode = keyof typeof CURRENCIES;
 
 const Overview = () => {
   const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
