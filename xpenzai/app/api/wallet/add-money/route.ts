@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDb from "@/config/dbConfig";
 import { Types } from "mongoose";
 import Wallet from "@/models/walletModel";
+import Transaction from "@/models/transactionModel";
 
 export async function POST(request: NextRequest) {
   await connectDb();
   try {
     const reqBody = await request.json();
-    const { walletId, amountToAdd } = reqBody;
+    const { walletId, amountToAdd, category, description } = reqBody;
     const userIdHeader = request.headers.get("x-user-id");
 
     if (!walletId || !amountToAdd) {
@@ -48,10 +49,21 @@ export async function POST(request: NextRequest) {
     wallet.balanceInMin += amountToAdd;
     await wallet.save();
 
+    // Creating a transaction
+    const newTransaction = await Transaction.create({
+      walletId,
+      userId,
+      amountInMin: amountToAdd,
+      type: "income",
+      category,
+      description,
+    });
+
     return NextResponse.json(
       {
         message: "Successfully added amount to the wallet!!",
         amount: amountToAdd,
+        transaction: newTransaction,
       },
       { status: 200 }
     );

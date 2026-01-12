@@ -29,6 +29,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDepositeMoney, useGetWallets } from "@/hook/walletHook";
+import TransactionItem from "@/component/TransactionItem";
+import { transactionType } from "@/models/transactionModel";
 
 // 1. Define Currency Config
 export const CURRENCIES = {
@@ -38,6 +40,43 @@ export const CURRENCIES = {
 };
 
 export type CurrencyCode = keyof typeof CURRENCIES;
+
+// 2. Dummy Data
+const DUMMY_TRANSACTIONS: transactionType[] = [
+  {
+    _id: "69633f1628a1e8bc809c1d5d",
+    walletId: "69596b4731f3e9516de05953",
+    userId: "69596b1d31f3e9516de0594c",
+    amountInMin: 250000, // 2,500.00
+    type: "income",
+    category: "Salary",
+    createdAt: "2026-01-11T06:11:34.609+00:00",
+    updatedAt: "2026-01-11T06:11:34.609+00:00",
+    __v: 0,
+  },
+  {
+    _id: "69633f1628a1e8bc809c1d5e",
+    walletId: "69596b4731f3e9516de05953",
+    userId: "69596b1d31f3e9516de0594c",
+    amountInMin: 4500, // 45.00
+    type: "expense",
+    category: "Groceries",
+    createdAt: "2026-01-10T14:22:10.609+00:00",
+    updatedAt: "2026-01-10T14:22:10.609+00:00",
+    __v: 0,
+  },
+  {
+    _id: "69633f1628a1e8bc809c1d5f",
+    walletId: "69596b4731f3e9516de05953",
+    userId: "69596b1d31f3e9516de0594c",
+    amountInMin: 200, // 2.00
+    type: "income",
+    category: "Uncategorized",
+    createdAt: "2026-01-11T08:00:00.609+00:00",
+    updatedAt: "2026-01-11T08:00:00.609+00:00",
+    __v: 0,
+  },
+];
 
 const Overview = () => {
   const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
@@ -303,19 +342,28 @@ const Overview = () => {
           </Link>
         </div>
 
-        <Card className="border-2 border-dashed border-slate-200 bg-slate-50/50 rounded-2xl h-44 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-slate-400 font-bold italic">
-              No transactions found for this wallet.
-            </p>
-            <Button
-              variant="link"
-              className="text-green-600 font-bold mt-1 h-auto p-0"
-            >
-              Create your first entry
-            </Button>
-          </div>
-        </Card>
+        {/* --- ADDED: TRANSACTION LIST RENDERING --- */}
+        <div className="flex flex-col gap-3">
+          {DUMMY_TRANSACTIONS.length > 0 ? (
+            DUMMY_TRANSACTIONS.map((txn) => (
+              <TransactionItem key={txn._id} data={txn} currency={currency} />
+            ))
+          ) : (
+            <Card className="border-2 border-dashed border-slate-200 bg-slate-50/50 rounded-2xl h-44 flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-slate-400 font-bold italic">
+                  No transactions found for this wallet.
+                </p>
+                <Button
+                  variant="link"
+                  className="text-green-600 font-bold mt-1 h-auto p-0"
+                >
+                  Create your first entry
+                </Button>
+              </div>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
