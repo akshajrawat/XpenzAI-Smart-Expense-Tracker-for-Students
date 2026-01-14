@@ -29,25 +29,13 @@ export const sidebarLinks = [
     href: "/wallets",
   },
   {
-    id: 3,
-    title: "Shared Wallets",
-    icon: <Users className="w-5 h-5" />,
-    href: "/shared",
-  },
-  {
     id: 4,
-    title: "Add Expense",
-    icon: <PlusCircle className="w-5 h-5" />,
-    href: "/add-expense",
-  },
-  {
-    id: 5,
     title: "Analytics",
     icon: <PieChart className="w-5 h-5" />,
     href: "/analytics",
   },
   {
-    id: 6,
+    id: 5,
     title: "Settings",
     icon: <Settings className="w-5 h-5" />,
     href: "/settings",

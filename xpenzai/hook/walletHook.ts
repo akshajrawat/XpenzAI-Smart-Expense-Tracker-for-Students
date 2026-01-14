@@ -19,11 +19,34 @@ export function useGetWallets(type: string) {
   });
 }
 
+// GET A SPECIFIC WALLET FROM BACKEND
+export function useGetWallet(walletId: string) {
+  return useQuery({
+    queryKey: ["wallet", walletId],
+    queryFn: async () => {
+      const response = await axiosInstance.get(
+        `/api/wallet/create-get-wallet/${walletId}`
+      );
+      return response.data.wallet;
+    },
+    staleTime: 1000 * 60,
+    enabled: !!walletId,
+  });
+}
+
 // DEPOSITE MONEY OT A SPECIFIC WALLET
 export function useDepositeMoney() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { walletId: string; amountToAdd: number }) => {
+    mutationFn: async (data: {
+      paymentData: {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+      };
+      walletId: string;
+      amountToAdd: number;
+    }) => {
       const response = await axiosInstance.post("/api/wallet/add-money", data);
       return response.data;
     },
@@ -31,6 +54,7 @@ export function useDepositeMoney() {
     onSuccess: (data) => {
       toast.success(data.message || "Amount added!!");
       queryClient.invalidateQueries({ queryKey: ["wallets"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
 
     onError: (error: any) => {
@@ -63,5 +87,21 @@ export function useCreateWallet() {
       toast.error(errorMessage);
       console.error("Wallet Creation error :", errorMessage);
     },
+  });
+}
+
+// GET transactions FROM BACKEND
+export function useGetTransactions(walletId: string | undefined) {
+  return useQuery({
+    queryKey: ["transactions", walletId],
+    queryFn: async () => {
+      if (!walletId) return [];
+      const response = await axiosInstance.get(
+        `/api/transaction/get-transactions/${walletId}`
+      );
+      return response.data.transactions;
+    },
+    enabled: !!walletId,
+    staleTime: 1000 * 60,
   });
 }

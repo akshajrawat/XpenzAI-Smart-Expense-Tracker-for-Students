@@ -9,6 +9,10 @@ import {
   Wallet as WalletIcon,
   ChevronDown,
   Check,
+  Loader2,
+  Users,
+  Landmark,
+  Info, // Added for the spinner
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -28,9 +32,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useDepositeMoney, useGetWallets } from "@/hook/walletHook";
+import { useGetTransactions, useGetWallets } from "@/hook/walletHook";
 import TransactionItem from "@/component/TransactionItem";
-import { transactionType } from "@/models/transactionModel";
+import { useCreateOrder } from "@/hook/paymentHook";
+import { ItransactionType } from "@/types/transactionTypes";
 
 // 1. Define Currency Config
 export const CURRENCIES = {
@@ -41,49 +46,27 @@ export const CURRENCIES = {
 
 export type CurrencyCode = keyof typeof CURRENCIES;
 
-// 2. Dummy Data
-const DUMMY_TRANSACTIONS: transactionType[] = [
-  {
-    _id: "69633f1628a1e8bc809c1d5d",
-    walletId: "69596b4731f3e9516de05953",
-    userId: "69596b1d31f3e9516de0594c",
-    amountInMin: 250000, // 2,500.00
-    type: "income",
-    category: "Salary",
-    createdAt: "2026-01-11T06:11:34.609+00:00",
-    updatedAt: "2026-01-11T06:11:34.609+00:00",
-    __v: 0,
-  },
-  {
-    _id: "69633f1628a1e8bc809c1d5e",
-    walletId: "69596b4731f3e9516de05953",
-    userId: "69596b1d31f3e9516de0594c",
-    amountInMin: 4500, // 45.00
-    type: "expense",
-    category: "Groceries",
-    createdAt: "2026-01-10T14:22:10.609+00:00",
-    updatedAt: "2026-01-10T14:22:10.609+00:00",
-    __v: 0,
-  },
-  {
-    _id: "69633f1628a1e8bc809c1d5f",
-    walletId: "69596b4731f3e9516de05953",
-    userId: "69596b1d31f3e9516de0594c",
-    amountInMin: 200, // 2.00
-    type: "income",
-    category: "Uncategorized",
-    createdAt: "2026-01-11T08:00:00.609+00:00",
-    updatedAt: "2026-01-11T08:00:00.609+00:00",
-    __v: 0,
-  },
-];
-
 const Overview = () => {
   const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
   const [amount, setAmount] = useState("0");
-  const { data: wallet, isPending, refetch } = useGetWallets("Personal");
-  const { mutate } = useDepositeMoney();
-  console.log(wallet);
+
+  // calls query to get personal wallet
+  const {
+    data: wallet,
+    isPending: isPendingPersonalWallet,
+    refetch,
+  } = useGetWallets("Personal");
+
+  // 2. SAFELY derive the ID (Prevents the crash!)
+  const activeWalletId = wallet?.[0]?._id;
+
+  // 3. Fetch Transactions (Only runs when activeWalletId exists)
+  const { data: transactions, isPending: isPendingTransactions } =
+    useGetTransactions(activeWalletId);
+
+  // Get the mutate functions for depositing of money form query
+  const { mutate: createOrder } = useCreateOrder();
+
   // Currency State
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
 
@@ -100,6 +83,7 @@ const Overview = () => {
     })();
   }, []);
 
+  console.log(transactions);
   // Helper to Convert Balance
   const getDisplayBalance = (balanceInMin: number | undefined) => {
     if (!balanceInMin) return "0.00";
@@ -140,12 +124,13 @@ const Overview = () => {
     try {
       let amountInPaise: number =
         parseFloat(amount) * CURRENCIES[currency].rate * 100;
-      const data: { walletId: string; amountToAdd: number } = {
+      const data: { amount: number; walletId: string } = {
+        amount: amountInPaise,
         walletId: wallet[0]?._id,
-        amountToAdd: amountInPaise,
       };
-      // deposite money
-      mutate(data);
+
+      // Create order
+      createOrder(data);
       setIsAddMoneyOpen(false);
     } catch (error: any) {
       setIsAddMoneyOpen(false);
@@ -183,7 +168,7 @@ const Overview = () => {
                   <span className="text-3xl md:text-5xl mr-1 text-slate-400">
                     {CURRENCIES[currency].symbol}
                   </span>
-                  {!isPending
+                  {!isPendingPersonalWallet
                     ? getDisplayBalance(wallet[0]?.balanceInMin)
                     : "0.00"}
                 </h2>
@@ -227,70 +212,152 @@ const Overview = () => {
 
               <div className="flex gap-3">
                 {/* ADD MONEY POPUP */}
-                <Dialog open={isAddMoneyOpen} onOpenChange={setIsAddMoneyOpen}>
+                <Card className="border-0 shadow-none p-0 bg-transparent">
+                  <Dialog
+                    open={isAddMoneyOpen}
+                    onOpenChange={setIsAddMoneyOpen}
+                  >
+                    <DialogTrigger asChild>
+                      <Button className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 rounded-xl h-11 transition-all active:scale-95 shadow-sm shadow-green-600/20">
+                        <Plus className="w-4 h-4 mr-1" /> Add Money
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent
+                      aria-describedby={undefined}
+                      className="sm:max-w-[420px] rounded-4xl border-2 border-slate-100 p-8"
+                    >
+                      <DialogHeader className="flex flex-col items-center text-center">
+                        <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mb-4">
+                          <Plus className="w-7 h-7 text-green-600 stroke-[3px]" />
+                        </div>
+                        <DialogTitle className="text-2xl font-extrabold text-slate-900">
+                          Add Money
+                        </DialogTitle>
+                        <p className="text-slate-500 font-bold text-sm">
+                          Enter amount in {currency}
+                        </p>
+                      </DialogHeader>
+
+                      <div className="py-6 space-y-2">
+                        <Label
+                          htmlFor="amount"
+                          className="text-slate-700 font-bold ml-1"
+                        >
+                          Amount ({currency})
+                        </Label>
+                        <div className="relative group">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg group-focus-within:text-green-600 transition-colors pointer-events-none">
+                            {CURRENCIES[currency].symbol}
+                          </div>
+                          <Input
+                            id="amount"
+                            type="number"
+                            placeholder="0.00"
+                            value={amount}
+                            onChange={handleSetAmount}
+                            className="h-14 pl-11 rounded-2xl border-2 border-slate-100 bg-slate-50/50 focus-visible:ring-green-600 font-bold text-xl outline-none"
+                          />
+                        </div>
+                        <p className="text-xs text-slate-400 font-semibold ml-1">
+                          Note: This will be converted to paise for storage.
+                        </p>
+                      </div>
+
+                      <DialogFooter>
+                        <Button
+                          className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded-2xl shadow-lg shadow-green-600/20 transition-all active:scale-95"
+                          onClick={handleDeposite}
+                        >
+                          Confirm Deposit
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </Card>
+
+                {/* INFO / DETAILS POPUP */}
+                <Dialog>
                   <DialogTrigger asChild>
-                    <Button className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 rounded-xl h-11 transition-all active:scale-95 shadow-sm shadow-green-600/20">
-                      <Plus className="w-4 h-4 mr-1" /> Add Money
+                    <Button
+                      variant="outline"
+                      className="border-2 border-slate-100 text-slate-600 font-bold px-6 rounded-xl h-11 hover:bg-slate-50 transition-all gap-2"
+                    >
+                      <Info className="w-4 h-4" /> Details
                     </Button>
                   </DialogTrigger>
-                  <DialogContent
-                    aria-describedby={undefined}
-                    className="sm:max-w-[420px] rounded-4xl border-2 border-slate-100 p-8"
-                  >
-                    <DialogHeader className="flex flex-col items-center text-center">
-                      <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mb-4">
-                        <Plus className="w-7 h-7 text-green-600 stroke-[3px]" />
-                      </div>
-                      <DialogTitle className="text-2xl font-extrabold text-slate-900">
-                        Add Money
+                  <DialogContent className="sm:max-w-[425px] rounded-xl border-2 border-slate-100 p-8">
+                    <DialogHeader className="mb-4">
+                      <DialogTitle className="text-2xl font-extrabold text-slate-900 flex items-center gap-3">
+                        <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                          <Info className="w-5 h-5 text-slate-600" />
+                        </div>
+                        How it Works
                       </DialogTitle>
-                      <p className="text-slate-500 font-bold text-sm">
-                        Enter amount in {currency}
-                      </p>
                     </DialogHeader>
 
-                    <div className="py-6 space-y-2">
-                      <Label
-                        htmlFor="amount"
-                        className="text-slate-700 font-bold ml-1"
-                      >
-                        Amount ({currency})
-                      </Label>
-                      <div className="relative group">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg group-focus-within:text-green-600 transition-colors pointer-events-none">
-                          {CURRENCIES[currency].symbol}
-                        </div>
-                        <Input
-                          id="amount"
-                          type="number"
-                          placeholder="0.00"
-                          value={amount}
-                          onChange={handleSetAmount}
-                          className="h-14 pl-11 rounded-2xl border-2 border-slate-100 bg-slate-50/50 focus-visible:ring-green-600 font-bold text-xl outline-none"
-                        />
-                      </div>
-                      <p className="text-xs text-slate-400 font-semibold ml-1">
-                        Note: This will be converted to paise for storage.
+                    <div className="space-y-6">
+                      <p className="text-slate-500 font-medium leading-relaxed">
+                        Your{" "}
+                        <span className="font-bold text-slate-800">
+                          Personal Wallet
+                        </span>{" "}
+                        acts as your central hub. Money must be added here first
+                        before it can be moved to groups.
                       </p>
-                    </div>
 
-                    <DialogFooter>
-                      <Button
-                        className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded-2xl shadow-lg shadow-green-600/20 transition-all active:scale-95"
-                        onClick={handleDeposite}
-                      >
-                        Confirm Deposit
-                      </Button>
-                    </DialogFooter>
+                      {/* Visual Flow Steps */}
+                      <div className="relative space-y-4">
+                        {/* Step 1 */}
+                        <div className="flex gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 items-start">
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm shrink-0">
+                            <Landmark className="w-5 h-5 text-purple-500" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-800 mb-1">
+                              1. Top Up
+                            </h4>
+                            <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                              Add money from your Bank Account, UPI, or Card via
+                              Razorpay into this Personal Wallet.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Connector Arrow */}
+                        <div className="absolute left-[26px] top-[70px] h-6 border-l-2 border-dashed border-slate-300 z-0 hidden sm:block"></div>
+
+                        {/* Step 2 */}
+                        <div className="flex gap-4 p-4 bg-green-50 rounded-2xl border border-green-100 items-start z-10 relative">
+                          <div className="bg-white p-2.5 rounded-xl border border-green-100 shadow-sm shrink-0">
+                            <Users className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-800 mb-1">
+                              2. Distribute
+                            </h4>
+                            <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                              Once money is here, you can instantly transfer it
+                              to any
+                              <span className="font-bold text-green-700">
+                                {" "}
+                                Shared Wallet{" "}
+                              </span>
+                              without using a payment gateway again.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <DialogFooter>
+                        <div className="w-full bg-slate-100 rounded-xl p-3 text-center">
+                          <p className="text-xs font-bold text-slate-500">
+                            Internal transfers are instant & fee-free.
+                          </p>
+                        </div>
+                      </DialogFooter>
+                    </div>
                   </DialogContent>
                 </Dialog>
-
-                <Button
-                  variant="outline"
-                  className="border-2 border-slate-100 text-slate-600 font-bold px-6 rounded-xl h-11 hover:bg-slate-50 transition-all"
-                >
-                  Details
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -328,7 +395,7 @@ const Overview = () => {
         </div>
       </div>
 
-      {/* Recent Transactions Placeholder */}
+      {/* Recent Transactions Section */}
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4 px-1">
           <h3 className="font-bold text-xl text-slate-800">
@@ -342,13 +409,23 @@ const Overview = () => {
           </Link>
         </div>
 
-        {/* --- ADDED: TRANSACTION LIST RENDERING --- */}
+        {/* --- TRANSACTION LIST RENDERING WITH LOADING SPINNER --- */}
         <div className="flex flex-col gap-3">
-          {DUMMY_TRANSACTIONS.length > 0 ? (
-            DUMMY_TRANSACTIONS.map((txn) => (
+          {isPendingTransactions ? (
+            /* Loading State */
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="w-10 h-10 text-green-600 animate-spin" />
+              <p className="text-slate-500 font-bold mt-2">
+                Fetching your transactions...
+              </p>
+            </div>
+          ) : transactions?.length > 0 ? (
+            /* Data State */
+            transactions.map((txn: ItransactionType) => (
               <TransactionItem key={txn._id} data={txn} currency={currency} />
             ))
           ) : (
+            /* Empty State */
             <Card className="border-2 border-dashed border-slate-200 bg-slate-50/50 rounded-2xl h-44 flex items-center justify-center">
               <div className="text-center">
                 <p className="text-slate-400 font-bold italic">

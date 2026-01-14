@@ -1,13 +1,13 @@
 import connectDb from "@/config/dbConfig";
 import Wallet from "@/models/walletModel";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // GET A SPECIFIC WALLET OF THE USER
-export async function GET({ params }: any) {
+export async function GET(request: NextRequest, { params }: any) {
   await connectDb();
 
   try {
-    const { walletId } = params;
+    const { walletId } = await params;
 
     if (!walletId) {
       return NextResponse.json(

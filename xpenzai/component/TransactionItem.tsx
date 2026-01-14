@@ -1,12 +1,12 @@
 import { CURRENCIES, CurrencyCode } from "@/app/(dashboard)/overview/page";
-import { transactionType } from "@/models/transactionModel";
-import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { ItransactionType } from "@/types/transactionTypes";
+import { ArrowDownLeft, ArrowUpRight, Hash } from "lucide-react"; // Added Hash icon
 
 const TransactionItem = ({
   data,
   currency,
 }: {
-  data: transactionType;
+  data: ItransactionType;
   currency: CurrencyCode;
 }) => {
   const isIncome = data.type === "income";
@@ -20,6 +20,7 @@ const TransactionItem = ({
 
   // Currency Logic
   const amount = data.amountInMin / 100 / CURRENCIES[currency].rate;
+
   return (
     <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-green-200 transition-all hover:shadow-md group">
       <div className="flex items-center gap-4">
@@ -40,9 +41,19 @@ const TransactionItem = ({
 
         {/* Text Info */}
         <div className="flex flex-col gap-1.5">
-          <p className="font-extrabold text-slate-800 text-base capitalize leading-none">
-            {data.type}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-extrabold text-slate-800 text-base capitalize leading-none">
+              {data.type}
+            </p>
+            {/* Payment ID Display */}
+            {data.description && (
+              <span className="flex items-center gap-0.5 text-[10px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                <Hash className="w-2.5 h-2.5" />
+                {data.description.slice(-8)}{" "}
+                {/* Shows last 8 chars to keep it clean */}
+              </span>
+            )}
+          </div>
 
           <div className="flex items-center gap-2">
             <span className="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-slate-200">

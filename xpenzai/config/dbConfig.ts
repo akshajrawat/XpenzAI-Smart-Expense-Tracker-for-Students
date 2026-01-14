@@ -1,8 +1,15 @@
 import mongoose from "mongoose";
 
+let isConnected = false;
+
 const connectDb = async () => {
+  if (isConnected) {
+    console.log("=> Using existing database connection");
+    return;
+  }
   try {
-    await mongoose.connect(process.env.MONGO_URI as string);
+    const db = await mongoose.connect(process.env.MONGO_URI as string);
+    isConnected = db.connections[0].readyState === 1;
     const connection = mongoose.connection;
 
     connection.on("connected", () => {
@@ -15,11 +22,9 @@ const connectDb = async () => {
           err
       );
     });
-    
   } catch (error) {
-    console.log("Something went rong while connecting to DB");
-    console.log(error);
-    process.exit(1);
+    console.error("Something went rong while connecting to DB" + error);
+    throw new Error("Failed to connect to database");
   }
 };
 

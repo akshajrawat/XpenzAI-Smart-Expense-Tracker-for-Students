@@ -3,13 +3,29 @@ import connectDb from "@/config/dbConfig";
 import { Types } from "mongoose";
 import Wallet from "@/models/walletModel";
 import Transaction from "@/models/transactionModel";
+import crypto from "crypto";
 
 export async function POST(request: NextRequest) {
   await connectDb();
   try {
     const reqBody = await request.json();
-    const { walletId, amountToAdd, category, description } = reqBody;
+    const { paymentData, walletId, amountToAdd, category } = reqBody;
     const userIdHeader = request.headers.get("x-user-id");
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      paymentData;
+
+    // 2. Security: Verify the Signature
+    const generated_signature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest("hex");
+
+    if (generated_signature !== razorpay_signature) {
+      return NextResponse.json(
+        { message: "Payment verification failed! Invalid signature." },
+        { status: 400 }
+      );
+    }
 
     if (!walletId || !amountToAdd) {
       return NextResponse.json(
@@ -56,7 +72,7 @@ export async function POST(request: NextRequest) {
       amountInMin: amountToAdd,
       type: "income",
       category,
-      description,
+      description: razorpay_payment_id,
     });
 
     return NextResponse.json(

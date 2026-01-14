@@ -4,6 +4,7 @@ import { Baloo_Bhai_2 } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import LayoutWrapper from "@/component/LayoutWrapper";
 import QueryProvider from "@/providers/QueryProvider";
+import Script from "next/script";
 
 const balooBhai = Baloo_Bhai_2({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default async function RootLayout({
           <LayoutWrapper>{children}</LayoutWrapper>
         </QueryProvider>
       </body>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
     </html>
   );
 }

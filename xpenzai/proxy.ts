@@ -6,13 +6,17 @@ import { tokenTypes } from "@/app/api/users/login/route";
 const PUBLIC_API: string[] = ["/api/users"];
 
 // private api that only user with token can hit
-const PRIVATE_API: string[] = ["/api/wallet"];
+const PRIVATE_API: string[] = [
+  "/api/wallet",
+  "/api/transaction",
+  "/api/payment",
+];
 
 // paths that user can hit when they have no token
 const NO_TOKEN_PATH: string[] = ["/auth"];
 
 // paths that user can hit when they have  token
-const TOKEN_PATH: string[] = ["/overview"];
+const TOKEN_PATH: string[] = ["/overview", "/wallets"];
 
 export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;

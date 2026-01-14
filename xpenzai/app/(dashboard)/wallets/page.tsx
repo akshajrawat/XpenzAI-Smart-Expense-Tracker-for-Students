@@ -125,9 +125,10 @@ const WalletsPage = () => {
         <div className="flex items-center gap-3">
           <Button
             onClick={() => setIsCreateOpen(true)}
-            className="hidden md:flex bg-green-600 hover:bg-green-700 text-white font-bold shadow-lg shadow-green-600/20 active:scale-95 transition-all"
+            className=" flex justify-center items-center bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold shadow-lg shadow-green-600/20 active:scale-95 transition-all"
           >
-            <Plus className="w-5 h-5 mr-2" /> New Shared Wallet
+            <Plus className="font-bold" />
+            <span className="mt-0.5">New Shared Wallet</span>
           </Button>
         </div>
       </div>
@@ -280,13 +281,15 @@ const WalletsPage = () => {
                         <div className="flex items-center gap-1">
                           <span>{wallet.members?.length} Members</span>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-green-600 hover:text-green-700 font-bold p-0 h-auto hover:bg-transparent"
-                        >
-                          Open &rarr;
-                        </Button>
+                        <Link href={`/wallets/${wallet._id}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-green-600 hover:text-green-700 font-bold p-0 h-auto hover:bg-transparent"
+                          >
+                            Open &rarr;
+                          </Button>
+                        </Link>
                       </CardFooter>
                     </Card>
                   ))}
